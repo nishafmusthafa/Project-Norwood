@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Norwood HQ – Pilot Store Planner</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--fg:#1d2330;--mut:#5d6677;--line:#dfe3ea;--acc:#2f5bd3;--ok:#1f8a4c;--warn:#b7791f;--bad:#c53030;--crit:#c53030;--chip:#eef1f6}
+[data-theme=dark]{--bg:#11151c;--card:#1a2029;--fg:#e8ecf2;--mut:#9aa4b5;--line:#2c3441;--acc:#6f95ff;--ok:#48bb78;--warn:#ecc94b;--bad:#fc8181;--crit:#fc8181;--chip:#252d39}
+*{box-sizing:border-box}body{margin:0;font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--fg)}
+header{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;padding:.6rem 1rem;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+header h1{font-size:1.1rem;margin:0 1rem 0 0}header .sp{flex:1}
+nav{display:flex;flex-wrap:wrap;gap:.25rem}nav button{background:none;border:0;padding:.45rem .7rem;border-radius:6px;color:var(--fg);cursor:pointer;font:inherit}
+nav button[aria-current=page]{background:var(--acc);color:#fff}
+main{padding:1rem;max-width:1400px;margin:auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1rem;margin-bottom:1rem}
+.grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.big{font-size:2rem;font-weight:700}.mut{color:var(--mut)}.small{font-size:.85rem}
+button,select,input,textarea{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:.35rem .55rem}
+button{cursor:pointer}button.pri{background:var(--acc);color:#fff;border-color:var(--acc)}button.del{color:var(--bad)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:.4rem;border-bottom:1px solid var(--line);vertical-align:top}th{cursor:pointer;font-size:.85rem;color:var(--mut);white-space:nowrap}
+.tw{overflow-x:auto}
+.bar{height:10px;background:var(--chip);border-radius:6px;overflow:hidden}.bar>i{display:block;height:100%;background:var(--acc)}
+.chip{display:inline-block;padding:.05rem .45rem;border-radius:999px;background:var(--chip);font-size:.78rem;margin:1px}
+.crit{color:#fff;background:var(--crit)}.st-Done{background:var(--ok);color:#fff}.st-Blocked{background:var(--bad);color:#fff}.st-In.progress,.st-Inprogress{background:var(--warn);color:#000}
+.warn{color:var(--warn);font-weight:600}.bad{color:var(--bad);font-weight:600}
+.kan{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:.75rem;overflow-x:auto}
+.col{background:var(--chip);border-radius:10px;padding:.5rem;min-height:200px}.col.over{outline:2px dashed var(--acc)}
+.kc{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:.5rem;margin:.4rem 0;cursor:grab}
+.filters{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.75rem}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}.cal div{background:var(--card);border:1px solid var(--line);min-height:90px;padding:3px;font-size:.75rem;overflow:hidden}.cal .hd{min-height:auto;font-weight:600;text-align:center}.cal .today{outline:2px solid var(--acc)}.cal .oth{opacity:.4}
+dialog{border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--fg);max-width:640px;width:95%}
+dialog::backdrop{background:#0007}label{display:block;margin:.4rem 0 .15rem;font-size:.85rem;color:var(--mut)}dialog input,dialog select,dialog textarea{width:100%}
+.note{border-left:4px solid var(--warn);padding:.5rem .75rem;background:var(--chip);border-radius:4px}
+.sw{display:inline-block;width:28px;height:28px;border-radius:4px;border:1px solid var(--line);vertical-align:middle}
+td[contenteditable]:hover{background:var(--chip)}
+svg text{fill:var(--fg)}
+@media(max-width:700px){main{padding:.5rem}.kan{grid-template-columns:repeat(4,80vw)}.cal div{min-height:60px}header h1{width:100%}}
+@media print{header,nav,.filters,button{display:none!important}}
+</style>
+</head>
+<body>
+<header>
+<h1>Norwood HQ</h1>
+<nav id="nav" aria-label="Main"></nav>
+<span class="sp"></span>
+<button id="sync" class="small" aria-live="polite" title="Sync status">…</button>
+<label for="me" class="small" style="margin:0">I am</label>
+<select id="me" aria-label="I am"></select>
+<button id="theme" aria-label="Toggle dark mode">◐</button>
+</header>
+<main id="app" tabindex="-1"></main>
+<dialog id="dlg"><form method="dialog" id="dlgf"></form></dialog>
+<dialog id="login" aria-labelledby="lgh"><form id="lgf">
+<h3 id="lgh">Join Norwood HQ</h3>
+<p class="small">Enter the team passcode to see and edit the shared plan. Everyone with the passcode sees the same data, live.</p>
+<label for="lgc">Team passcode</label><input id="lgc" autocomplete="current-password" type="password" required>
+<label for="lgm">I am</label><select id="lgm"></select>
+<p id="lge" class="bad small" role="alert"></p>
+<p style="display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap"><button type="button" id="lgo">Work offline</button><button class="pri" id="lgs">Join</button></p>
+</form></dialog>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script id="seed" type="application/json">{"version": 1, "project": {"name": "Norwood Pilot Store (working name TBC)", "address": "409 Herries Road, Sheffield S5 7HF", "opening": "2027-03-05", "softLaunch": "2027-03-01"}, "team": [{"name": "Fanshad", "role": "Finance and Project Head", "areas": "Budget, lease, contracts, approvals, tech spend, hiring sign-off, buffer"}, {"name": "Nishaf", "role": "Operations and local support", "areas": "Council, suppliers, builders and workers, strip-out, fit-out, electrical, gas G01–G07, equipment"}, {"name": "Sooraj", "role": "Sales, Marketing and Branding", "areas": "Brand, artwork, social, pre-launch, grand opening"}, {"name": "Mammad", "role": "Kitchen, SOPs and Sales", "areas": "Layout and stations, menu and recipes, kit spec, food registration, soft launch"}, {"name": "Malik", "role": "Staff Head", "areas": "Hiring crew, training academy, food safety and allergens, stock management"}], "tasks": [{"id": "T01", "phase": "1 Site & regulatory", "name": "Confirm lease terms, ownership and permitted use with landlord/solicitor", "owner": "Fanshad", "start": "2026-11-09", "due": "2026-11-20", "deps": [], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "T02", "phase": "1 Site & regulatory", "name": "Email Sheffield City Council planning to confirm Class E position (hot food takeaway element)", "owner": "Nishaf", "start": "2026-11-09", "due": "2026-11-13", "deps": [], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "T03", "phase": "1 Site & regulatory", "name": "Planning/regulatory sign-off decision recorded (gating item for strip-out)", "owner": "Fanshad", "start": "2026-11-16", "due": "2026-12-18", "deps": ["T02"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "T04", "phase": "1 Site & regulatory", "name": "Measured survey and condition report (walls, ceilings, services, drainage)", "owner": "Nishaf", "start": "2026-11-16", "due": "2026-11-27", "deps": ["T01"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "T05", "phase": "1 Site & regulatory", "name": "Building Regulations route agreed and fire risk approach", "owner": "Nishaf", "start": "2026-11-30", "due": "2026-12-18", "deps": ["T04"], "critical": false, "status": "Not started", "progress": 0, "notes": []}, {"id": "G01", "phase": "6a Gas supply", "name": "Confirm with gas supplier/network whether a meter is present or needs installing; get MPRN and lead time", "owner": "Nishaf", "start": "2026-11-09", "due": "2026-11-20", "deps": [], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "G02", "phase": "6a Gas supply", "name": "Book meter installation/reconnection and supply activation", "owner": "Nishaf", "start": "2026-11-23", "due": "2026-12-11", "deps": ["G01"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "G03", "phase": "6a Gas supply", "name": "Meter fitted and supply live", "owner": "Nishaf", "start": "2026-12-14", "due": "2027-01-29", "deps": ["G02"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "G04", "phase": "6a Gas supply", "name": "Connect existing internal gas line to the meter (Gas Safe engineer)", "owner": "Nishaf", "start": "2027-02-01", "due": "2027-02-05", "deps": ["G03", "T15"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "G05", "phase": "6a Gas supply", "name": "Pipework alterations and runs to each appliance", "owner": "Nishaf", "start": "2027-02-01", "due": "2027-02-12", "deps": ["T07", "G04"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "G06", "phase": "6a Gas supply", "name": "Gas interlock with extraction installed", "owner": "Nishaf", "start": "2027-02-08", "due": "2027-02-12", "deps": ["T17", "G05"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "G07", "phase": "6a Gas supply", "name": "Tightness test, Gas Safe commissioning and certificate", "owner": "Nishaf", "start": "2027-02-15", "due": "2027-02-19", "deps": ["G06", "T22"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "T06", "phase": "2 Design & brand", "name": "Brand name and identity chosen from options; trademark search", "owner": "Sooraj", "start": "2026-11-09", "due": "2026-11-27", "deps": [], "critical": false, "status": "Not started", "progress": 0, "notes": []}, {"id": "T07", "phase": "2 Design & brand", "name": "Store layout: eat-in, counter, rider zone, kitchen stations, extraction and gas route", "owner": "Mammad", "start": "2026-11-23", "due": "2026-12-11", "deps": ["T04"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "T08", "phase": "2 Design & brand", "name": "Menu v1 lock: recipes, specs, spice scale, costing", "owner": "Mammad", "start": "2026-11-16", "due": "2026-12-18", "deps": ["T06"], "critical": false, "status": "Not started", "progress": 0, "notes": []}, {"id": "T09", "phase": "2 Design & brand", "name": "Signage, menu boards, packaging, uniform artwork", "owner": "Sooraj", "start": "2026-12-07", "due": "2027-01-15", "deps": ["T06", "T08"], "critical": false, "status": "Not started", "progress": 0, "notes": []}, {"id": "T10", "phase": "3 Procurement", "name": "Contractor tender, select and sign contract with programme", "owner": "Fanshad", "start": "2026-12-07", "due": "2026-12-23", "deps": ["T07"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "T11", "phase": "3 Procurement", "name": "Order long-lead kit: fryers, grill, pizza oven, plancha, extraction canopy, refrigeration, soft-serve", "owner": "Mammad", "start": "2026-12-14", "due": "2026-12-23", "deps": ["T07"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "T12", "phase": "3 Procurement", "name": "Suppliers: chicken, beef, tallow/canola blend, dough/cheese, packaging, drinks", "owner": "Nishaf", "start": "2026-12-07", "due": "2027-01-29", "deps": ["T08"], "critical": false, "status": "Not started", "progress": 0, "notes": []}, {"id": "T13", "phase": "3 Procurement", "name": "Tech stack: POS, kiosk, KDS, printer, card readers, delivery aggregator accounts", "owner": "Fanshad", "start": "2027-01-04", "due": "2027-02-05", "deps": ["T06"], "critical": false, "status": "Not started", "progress": 0, "notes": []}, {"id": "T14", "phase": "4 Strip-out", "name": "Strip-out of walls, ceilings and old grocery fixtures; waste removal", "owner": "Nishaf", "start": "2027-01-04", "due": "2027-01-15", "deps": ["T03", "T10"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "T15", "phase": "5 Fit-out", "name": "First fix: electrical rewiring, plumbing, drainage, grease trap", "owner": "Nishaf", "start": "2027-01-18", "due": "2027-01-29", "deps": ["T14"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "T16", "phase": "5 Fit-out", "name": "Walls, ceilings, hygienic cladding, flooring, lighting", "owner": "Nishaf", "start": "2027-01-25", "due": "2027-02-12", "deps": ["T15"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "T17", "phase": "6 Compliance", "name": "Kitchen extraction and ventilation installed and commissioned", "owner": "Nishaf", "start": "2027-01-25", "due": "2027-02-12", "deps": ["T11", "T15"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "T18", "phase": "6 Compliance", "name": "Electrical certificate, fire alarm and emergency lighting sign-off", "owner": "Nishaf", "start": "2027-02-08", "due": "2027-02-19", "deps": ["T16", "T17"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "T19", "phase": "6 Compliance", "name": "Food business registration with council (28+ days before opening)", "owner": "Mammad", "start": "2027-01-11", "due": "2027-01-29", "deps": ["T01"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "T20", "phase": "6 Compliance", "name": "Food safety management (HACCP/SFBB), allergen matrix, pest control", "owner": "Malik", "start": "2027-01-18", "due": "2027-02-19", "deps": ["T08"], "critical": false, "status": "Not started", "progress": 0, "notes": []}, {"id": "T21", "phase": "6 Compliance", "name": "Licensing check: late-night refreshment, signage consent", "owner": "Fanshad", "start": "2026-12-07", "due": "2027-01-29", "deps": ["T03"], "critical": false, "status": "Not started", "progress": 0, "notes": []}, {"id": "T22", "phase": "7 Equipment", "name": "Equipment delivery, install, commissioning; test cooks", "owner": "Nishaf", "start": "2027-02-08", "due": "2027-02-19", "deps": ["T11", "T16"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "T23", "phase": "8 People", "name": "Hire store manager and shift leads", "owner": "Fanshad", "start": "2026-12-07", "due": "2027-01-22", "deps": [], "critical": false, "status": "Not started", "progress": 0, "notes": []}, {"id": "T24", "phase": "8 People", "name": "Hire crew (kitchen and front of house), right-to-work checks", "owner": "Malik", "start": "2027-01-11", "due": "2027-02-12", "deps": ["T23"], "critical": false, "status": "Not started", "progress": 0, "notes": []}, {"id": "T25", "phase": "8 People", "name": "Training: food safety, station recipes, service rituals, POS/KDS", "owner": "Malik", "start": "2027-02-15", "due": "2027-02-26", "deps": ["T22", "T24", "G07"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "T31", "phase": "8 People", "name": "Stock management: supplier ordering, stock counts, par levels, wastage logging", "owner": "Malik", "start": "2027-02-01", "due": "2027-02-19", "deps": ["T08", "T12"], "critical": false, "status": "Not started", "progress": 0, "notes": []}, {"id": "T26", "phase": "9 Marketing", "name": "Social accounts, Google Business Profile, local launch content", "owner": "Sooraj", "start": "2027-01-11", "due": "2027-02-26", "deps": ["T06"], "critical": false, "status": "Not started", "progress": 0, "notes": []}, {"id": "T27", "phase": "9 Marketing", "name": "Pre-launch: leaflet drop, local partners, opening offer", "owner": "Sooraj", "start": "2027-02-08", "due": "2027-02-26", "deps": ["T09"], "critical": false, "status": "Not started", "progress": 0, "notes": []}, {"id": "T28", "phase": "10 Buffer", "name": "Programme buffer (2 weeks) absorbed by slippage only", "owner": "Fanshad", "start": "2027-02-15", "due": "2027-02-26", "deps": ["T18", "T22", "G07"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "T29", "phase": "11 Launch", "name": "Soft launch (friends, family, invited locals; limited menu)", "owner": "Mammad", "start": "2027-03-01", "due": "2027-03-03", "deps": ["T18", "T19", "T25", "G07"], "critical": true, "status": "Not started", "progress": 0, "notes": []}, {"id": "T30", "phase": "11 Launch", "name": "Grand opening and delivery apps live", "owner": "Sooraj", "start": "2027-03-05", "due": "2027-03-06", "deps": ["T29"], "critical": true, "status": "Not started", "progress": 0, "notes": []}], "raid": [{"id": "R1", "type": "Risk", "item": "Planning/use position delayed or not Class E", "impact": "High", "mitigation": "Ask council in week 1 (T02); re-baseline if application needed", "owner": "Fanshad", "status": "Open"}, {"id": "R2", "type": "Risk", "item": "Gas meter install/reconnection lead time", "impact": "High", "mitigation": "Contact supplier/GDN in Nov (G01); consider electric for some stations", "owner": "Nishaf", "status": "Open"}, {"id": "R3", "type": "Risk", "item": "Equipment and extraction lead times", "impact": "High", "mitigation": "Order by 23 Dec; delivery dates in writing", "owner": "Mammad", "status": "Open"}, {"id": "R4", "type": "Risk", "item": "Contractor slippage over Christmas/January", "impact": "High", "mitigation": "Fixed programme, weekly site meetings, 2-week buffer", "owner": "Nishaf", "status": "Open"}, {"id": "R5", "type": "Risk", "item": "Hidden condition issues after strip-out", "impact": "Medium", "mitigation": "Intrusive survey in Nov; contingency", "owner": "Nishaf", "status": "Open"}, {"id": "R6", "type": "Risk", "item": "Brand not cleared in time for signage", "impact": "Medium", "mitigation": "Decide by 27 Nov; trademark search in parallel", "owner": "Sooraj", "status": "Open"}, {"id": "R7", "type": "Risk", "item": "Price sensitivity in a deprived area", "impact": "Medium", "mitigation": "Meal deals; test prices in soft launch", "owner": "Sooraj", "status": "Open"}, {"id": "R8", "type": "Risk", "item": "Hiring shortfall", "impact": "Medium", "mitigation": "Start manager hire in Dec", "owner": "Malik", "status": "Open"}, {"id": "A1", "type": "Assumption", "item": "User believes the use falls under Class E; to confirm with council", "impact": "", "mitigation": "", "owner": "Fanshad", "status": "Open"}, {"id": "A2", "type": "Assumption", "item": "Electric supply adequate; rewiring only", "impact": "", "mitigation": "", "owner": "Nishaf", "status": "Open"}, {"id": "A3", "type": "Assumption", "item": "KPI and cost targets are planning ranges, not validated", "impact": "", "mitigation": "", "owner": "Fanshad", "status": "Open"}, {"id": "A4", "type": "Assumption", "item": "Lease permits the works and hot food use", "impact": "", "mitigation": "", "owner": "Fanshad", "status": "Open"}, {"id": "I1", "type": "Issue", "item": "Internal gas line not connected to a meter or supply", "impact": "High", "mitigation": "G01–G07", "owner": "Nishaf", "status": "Open"}, {"id": "I2", "type": "Issue", "item": "Brand name and identity not chosen", "impact": "Medium", "mitigation": "T06", "owner": "Sooraj", "status": "Open"}, {"id": "D1", "type": "Decision", "item": "Strip-out does not start before planning/regulatory sign-off", "impact": "", "mitigation": "", "owner": "Fanshad", "status": "Proposed"}, {"id": "D2", "type": "Decision", "item": "Pilot is company-owned and the training store", "impact": "", "mitigation": "", "owner": "Fanshad", "status": "Proposed"}, {"id": "D3", "type": "Decision", "item": "Next-phase drinks and pizza expansion out of pilot scope", "impact": "", "mitigation": "", "owner": "Leadership team", "status": "Proposed"}], "questions": [{"id": "Q1", "question": "Brand name and style direction (A, B, C or other)", "owner": "Sooraj", "needed": "2026-11-27", "status": "Open", "answer": ""}, {"id": "Q2", "question": "Is 'Super Chicken' a contender or mock-up only?", "owner": "Sooraj", "needed": "2026-11-27", "status": "Open", "answer": ""}, {"id": "Q3", "question": "Halal certification (chicken, beef, beef tallow) and allergen disclosure", "owner": "Mammad", "needed": "2026-12-18", "status": "Open", "answer": ""}, {"id": "Q4", "question": "Total budget and contingency", "owner": "Fanshad", "needed": "2026-11-20", "status": "Open", "answer": ""}, {"id": "Q5", "question": "External architect and contractor appointed", "owner": "Nishaf", "needed": "2026-12-23", "status": "Open", "answer": ""}, {"id": "Q6", "question": "Planning confirmation (Class E) from council", "owner": "Nishaf", "needed": "2026-11-13", "status": "Open", "answer": ""}, {"id": "Q7", "question": "Lease holder and terms", "owner": "Fanshad", "needed": "2026-11-20", "status": "Open", "answer": ""}, {"id": "Q8", "question": "Trading after 23:00?", "owner": "Fanshad", "needed": "2026-12-31", "status": "Open", "answer": ""}], "menu": [{"category": "Fried chicken", "item": "Original 2pc", "price": "£5.50"}, {"category": "Fried chicken", "item": "Original 3pc", "price": "£7.00"}, {"category": "Fried chicken", "item": "Nashville hot 2pc", "price": "£6.00"}, {"category": "Fried chicken", "item": "Nashville hot 3pc", "price": "£7.50"}, {"category": "Fried chicken", "item": "Tenders 3pc", "price": "£5.50"}, {"category": "Fried chicken", "item": "Tenders 5pc", "price": "£8.00"}, {"category": "Fried chicken", "item": "Wings 6pc", "price": "£5.50"}, {"category": "Fried chicken", "item": "Wings 10pc", "price": "£8.50"}, {"category": "Flame-grilled", "item": "Quarter chicken", "price": "£5.75"}, {"category": "Flame-grilled", "item": "Half chicken", "price": "£9.50"}, {"category": "Flame-grilled", "item": "Full chicken", "price": "£16.50"}, {"category": "Burgers", "item": "Smash burger", "price": "£6.50"}, {"category": "Burgers", "item": "Fried chicken / tender burger", "price": "£7.00"}, {"category": "Sides", "item": "Tender + mac n cheese", "price": "£6.50"}, {"category": "Sides", "item": "Loaded fries", "price": "£5.50"}, {"category": "Sides", "item": "Fries regular", "price": "£3.00"}, {"category": "Sides", "item": "Fries large", "price": "£3.75"}, {"category": "Pizza", "item": "Rotating selection", "price": "from £6.00"}, {"category": "Dessert & drinks", "item": "Soft serve", "price": "£3.00"}, {"category": "Dessert & drinks", "item": "Milkshakes", "price": "£4.50"}, {"category": "Dessert & drinks", "item": "Fizzy drinks", "price": "£2.20"}, {"category": "Sauces", "item": "Extra sauce pot", "price": "£0.75"}, {"category": "Next phase", "item": "Mojito / Super Lemonade, Narunandi Drink, Milk Sarbath", "price": "Not priced"}], "kpis": [{"level": "Store", "kpi": "Food cost %", "target": "28–32% blended", "cadence": "Weekly"}, {"level": "Store", "kpi": "Labour cost %", "target": "22–28%", "cadence": "Weekly"}, {"level": "Store", "kpi": "Prime cost %", "target": "Under 60%", "cadence": "Weekly"}, {"level": "Store", "kpi": "Waste", "target": "Under 3% of purchases", "cadence": "Weekly"}, {"level": "Store", "kpi": "Speed of service", "target": "Under 5 min counter; delivery ready under 10 min", "cadence": "Daily"}, {"level": "Store", "kpi": "Order accuracy", "target": "98% or more", "cadence": "Weekly"}, {"level": "Store", "kpi": "Ratings / NPS", "target": "4.5+ / +50", "cadence": "Weekly"}, {"level": "Store", "kpi": "Hygiene rating", "target": "FSA 5", "cadence": "Each inspection"}, {"level": "Store", "kpi": "Brand standards audit", "target": "95% or more", "cadence": "Monthly"}, {"level": "Brand", "kpi": "New-store ramp", "target": "Pilot run-rate within 12 weeks", "cadence": "Monthly"}, {"level": "Brand", "kpi": "Audit consistency", "target": "All stores within 5 points", "cadence": "Monthly"}, {"level": "Brand", "kpi": "Pipeline", "target": "2x next phase in vetted sites", "cadence": "Monthly"}], "catchment": ["S5 7HF is in Burngreave ward (LSOA E01007943), on the edge of Firth Park ward (postcodes.io).", "Burngreave: 27,288 residents, 9,457 households, 2.89 per household, 27.0% under 16 (Census 2021).", "43.7% of Burngreave households have no car or van; Firth Park 39.1% (Census 2021).", "LSOA E01007943 among the 2% most deprived in England (IoD 2019, decile 1).", "46.5% of Burngreave residents identified as Muslim vs 10.3% Sheffield (Census 2021) – halal-demand indicator only.", "Anchors: Tesco Southey Superstore + petrol next door; Well Pharmacy on parade; Norwood Medical Centre ~170 m; 3 primary schools within ~400 m; D & K Dental ~410 m; Texaco ~230 m; Northern General Hospital ~1.1 km (estimates, straight-line).", "Nearest KFC ~1.6 km (822 Barnsley Rd); local independents rated 3.3–4.5; no Popeyes/Nando's/Domino's/Pizza Hut verified within 1 mile."], "brand": {"note": "Proposals awaiting leadership decision. Names need trademark check.", "names": [["Northcrumb", "No exact UK food brand found (quick search); needs trademark check"], ["Steel & Spice", "No exact UK food brand found; needs trademark check"], ["Kindle & Crust", "No exact UK food brand found; needs trademark check"], ["Super Chicken", "Name on draft menu mock-up; status to confirm"]], "styles": [{"name": "A. Bold street food", "palette": ["#D62828", "#F6BD16", "#1B1B1B", "#FFF4E0"], "type": "Anton / Inter", "tone": "Short, punchy, cheeky"}, {"name": "B. Family friendly", "palette": ["#E4572E", "#FFC857", "#2E8B57", "#FAF3E3"], "type": "Baloo 2 / Nunito", "tone": "Friendly, generous, inclusive"}, {"name": "C. Premium casual", "palette": ["#B23A1E", "#C9A227", "#14213D", "#EDEAE4"], "type": "DM Serif Display / DM Sans", "tone": "Assured and precise"}]}, "checklist": [{"id": "C1", "text": "Planning/use position confirmed and lease signed", "done": false}, {"id": "C2", "text": "Food business registered 28+ days before opening", "done": false}, {"id": "C3", "text": "Gas Safe, electrical, fire alarm and emergency lighting signed off", "done": false}, {"id": "C4", "text": "Extraction commissioned with gas interlock tested", "done": false}, {"id": "C5", "text": "HACCP/SFBB, allergen matrix, pest control in place", "done": false}, {"id": "C6", "text": "Stations built and test-cooked to spec", "done": false}, {"id": "C7", "text": "POS, kiosk/QR, KDS, printers, delivery apps tested end to end", "done": false}, {"id": "C8", "text": "Crew trained and signed off", "done": false}, {"id": "C9", "text": "Signage, menu boards, uniforms, packaging match brand book", "done": false}, {"id": "C10", "text": "Pre-opening audit 95% or more", "done": false}], "activity": []}</script>
+<script>
+"use strict";
+const KEY="norwoodhq.v1",SEED=JSON.parse(document.getElementById("seed").textContent);
+const STATUSES=["Not started","In progress","Blocked","Done"];
+let S,view=localStorage.getItem(KEY+".view")||"dashboard",ui={mode:"table",f:{owner:"",phase:"",status:"",crit:"",q:""},sort:"due",dir:1,mine:false,calM:null};
+const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const clone=o=>JSON.parse(JSON.stringify(o));
+const D=s=>new Date(s+"T00:00:00");const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
+const fmt=s=>s?D(s).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"2-digit"}):"";
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const me=()=>localStorage.getItem(KEY+".me")||"";
+/* ---------- Shared sync (Supabase) ----------
+ Each task, RAID row, question, menu item, KPI, checklist item, team member and activity entry
+ is stored as its own row, so two people editing different things never overwrite each other.
+ Other sections (project, catchment, brand) are stored as one row each. The browser keeps a
+ copy, so the app still works offline and pushes queued changes when it reconnects. */
+const SB={url:"https://ufinmrgnqwutxwntcdvs.supabase.co",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmaW5tcmducXd1dHh3bnRjZHZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNTQ3NzQsImV4cCI6MjEwNjgzMDc3NH0.OH5ZXB5eUSDWsDdRcn63Vm0fGSbC-eCg-JgHY_2c4Uo"};
+if(window.NORWOOD_SB)Object.assign(SB,window.NORWOOD_SB);
+const COLLS=["team","tasks","raid","questions","menu","kpis","checklist","activity"];
+const sync={code:localStorage.getItem(KEY+".code")||"",base:null,state:"off",peers:[],pushT:0,pullT:0,pushing:false,again:false,pendingPull:false,chan:null,err:""};
+const rk=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36);
+function keyify(s,seed){COLLS.forEach(k=>{const a=s[k];if(!Array.isArray(a))return;const seen=new Set();let mo=Math.max(-1,...a.map(x=>+x._o).filter(n=>!isNaN(n)));
+ a.forEach((it,i)=>{if(!it._k||seen.has(it._k))it._k=seed?k+":"+(it.id||i):rk();seen.add(it._k);if(it._o==null)it._o=seed?i:++mo})})}
+function flat(s){keyify(s);const m={};
+ for(const k of Object.keys(s)){if(COLLS.includes(k)&&Array.isArray(s[k]))s[k].forEach(it=>{m[k+"|"+it._k]={c:k,i:it._k,d:it}});else m["_doc|"+k]={c:"_doc",i:k,d:s[k]}}
+ for(const x of Object.values(m))x.j=JSON.stringify(x.d);return m}
+function unflat(m){const s={};COLLS.forEach(k=>s[k]=[]);
+ for(const x of Object.values(m)){if(x.c==="_doc")s[x.i]=x.d;else if(COLLS.includes(x.c))s[x.c].push(x.d)}
+ COLLS.forEach(k=>s[k].sort(k==="activity"?(a,b)=>String(b.at).localeCompare(String(a.at)):(a,b)=>(a._o-b._o)||String(a._k).localeCompare(String(b._k))));
+ s.activity=s.activity.slice(0,500);return s}
+function storeBase(){try{localStorage.setItem(KEY+".base",JSON.stringify(sync.base))}catch(e){}}
+async function rpc(fn,args){let r;try{r=await fetch(SB.url+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:SB.key,Authorization:"Bearer "+SB.key,"Content-Type":"application/json"},body:JSON.stringify(args)})}catch(e){const x=new Error("offline");x.net=true;throw x}
+ const j=await r.json().catch(()=>null);if(!r.ok){const x=new Error((j&&j.message)||r.statusText||"error");x.auth=/passcode/i.test(x.message);throw x}return j}
+function setSync(st,err){sync.state=st;sync.err=err||"";const b=$("#sync");if(!b)return;
+ const n=sync.peers.length,t={live:"● Live"+(n>1?" · "+n+" online":""),saving:"● Saving…",connecting:"● Connecting…",offline:"● Offline – saved here",off:"● Not joined"}[st]||st;
+ b.textContent=t;b.style.color=st==="live"?"var(--ok)":st==="offline"||st==="off"?"var(--warn)":"var(--mut)";
+ b.title=(st==="live"?"Shared data is live."+(n?" Online: "+sync.peers.join(", "):""):st==="offline"?"Can't reach the server. Changes are kept in this browser and will sync when it reconnects. "+sync.err:st==="off"?"Click to join with the team passcode.":"")}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}schedulePush()}
+function schedulePush(){if(!sync.code||!sync.base)return;clearTimeout(sync.pushT);sync.pushT=setTimeout(push,300)}
+async function push(){if(!sync.code||!sync.base)return;if(sync.pushing){sync.again=true;return}
+ const cur=flat(S),ch=[];for(const [k,x] of Object.entries(cur))if(sync.base[k]!==x.j)ch.push({c:x.c,i:x.i,d:x.d,k,j:x.j});
+ for(const k of Object.keys(sync.base))if(!cur[k]){const [c,...r]=k.split("|");ch.push({c,i:r.join("|"),d:null,k})}
+ if(!ch.length){if(sync.state==="saving")setSync("live");return}
+ sync.pushing=true;setSync("saving");
+ try{for(let o=0;o<ch.length;o+=1000){const part=ch.slice(o,o+1000);await rpc("hq_push",{code:sync.code,who:me()||"Unknown",changes:part.map(({c,i,d})=>({c,i,d}))});
+   part.forEach(x=>{if(x.d===null)delete sync.base[x.k];else sync.base[x.k]=x.j})}
+  storeBase();setSync("live");notify()}
+ catch(e){if(e.auth)return needLogin("The team passcode has changed. Please enter the new one.");setSync("offline",e.message);clearTimeout(sync.pushT);sync.pushT=setTimeout(push,8000)}
+ finally{sync.pushing=false;if(sync.again){sync.again=false;schedulePush()}}}
+const busy=()=>{const a=document.activeElement;return $("#dlg").open||(a&&(a.isContentEditable||a.tagName==="TEXTAREA"||(a.tagName==="INPUT"&&a.type!=="checkbox"&&a.type!=="file")))};
+function pullSoon(ms){clearTimeout(sync.pullT);sync.pullT=setTimeout(pull,ms||250)}
+async function pull(){if(!sync.code)return;if(busy()){sync.pendingPull=true;return}
+ let rows;try{rows=await rpc("hq_pull",{code:sync.code})}catch(e){if(e.auth)return needLogin("That passcode is no longer valid. Please enter the current one.");setSync("offline",e.message);return}
+ if(busy()){sync.pendingPull=true;return}
+ sync.pendingPull=false;const srv={};rows.forEach(r=>{const k=r.collection+"|"+r.id;srv[k]={c:r.collection,i:r.id,d:r.data,j:JSON.stringify(r.data)}});
+ const before=JSON.stringify(S);
+ if(!rows.length){sync.base={};storeBase();setSync("live");schedulePush();return} // empty server: this browser seeds it
+ if(!sync.base){ // first time this browser joins: adopt the shared data, keep a backup of any local copy
+  try{if(localStorage.getItem(KEY))localStorage.setItem(KEY+".presync",localStorage.getItem(KEY))}catch(e){}
+  S=unflat(srv)}
+ else{const cur=flat(S),out={},keys=new Set([...Object.keys(cur),...Object.keys(srv),...Object.keys(sync.base)]);
+  keys.forEach(k=>{const dirty=(cur[k]?cur[k].j:undefined)!==sync.base[k];const src=dirty?cur[k]:srv[k];if(src)out[k]=src});
+  S=unflat(out)}
+ sync.base={};Object.entries(srv).forEach(([k,x])=>sync.base[k]=x.j);storeBase();
+ try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+ setSync("live");schedulePush();
+ if(JSON.stringify(S)!==before){fillMe();render()}}
+setInterval(()=>{if(sync.pendingPull&&!busy())pull()},1500);
+setInterval(()=>{if(sync.code&&document.visibilityState==="visible")pullSoon()},20000);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")pullSoon()});
+window.addEventListener("online",()=>{pullSoon();schedulePush()});
+async function chanName(){try{const h=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("norwood-hq:"+sync.code));return "nhq-"+[...new Uint8Array(h)].slice(0,8).map(b=>b.toString(16).padStart(2,"0")).join("")}catch(e){return "nhq-default"}}
+async function startRT(){if(sync.chan||!window.supabase||!sync.code)return;try{
+ const c=window.supabase.createClient(SB.url,SB.key,{auth:{persistSession:false,autoRefreshToken:false}});
+ const ch=c.channel(await chanName(),{config:{broadcast:{self:false},presence:{key:rk()}}});sync.chan=ch;
+ ch.on("broadcast",{event:"changed"},()=>pullSoon()).on("presence",{event:"sync"},()=>{sync.peers=[...new Set(Object.values(ch.presenceState()).flat().map(p=>p.who||"Someone"))];setSync(sync.state)})
+  .subscribe(st=>{if(st==="SUBSCRIBED"){trackMe();pullSoon()}})}catch(e){sync.chan=null}}
+function trackMe(){try{sync.chan&&sync.chan.track({who:me()||"Someone"})}catch(e){}}
+function notify(){try{sync.chan&&sync.chan.send({type:"broadcast",event:"changed",payload:{}})}catch(e){}}
+async function connect(){setSync("connecting");await pull();startRT()}
+function needLogin(msg){sync.code="";localStorage.removeItem(KEY+".code");if(sync.chan){try{sync.chan.unsubscribe()}catch(e){}sync.chan=null;sync.peers=[]}setSync("off");showLogin(msg)}
+function showLogin(msg){const d=$("#login");if(d.open)return;$("#lge").textContent=msg||"";$("#lgc").value="";
+ $("#lgm").innerHTML='<option value="">— select —</option>'+owners().map(o=>`<option${o===me()?" selected":""}>${esc(o)}</option>`).join("");
+ d.showModal();$("#lgc").focus()}
+function bindLogin(){const d=$("#login");
+ $("#lgf").onsubmit=async e=>{e.preventDefault();const c=$("#lgc").value.trim();if(!c)return;$("#lgs").disabled=true;$("#lge").textContent="Checking…";
+  try{const ok=await rpc("hq_check",{code:c});if(!ok){$("#lge").textContent="That passcode isn't right.";return}
+   sync.code=c;localStorage.setItem(KEY+".code",c);if($("#lgm").value){localStorage.setItem(KEY+".me",$("#lgm").value);fillMe()}d.close();connect()}
+  catch(x){$("#lge").textContent=x.net?"Can't reach the server. Check your connection, or work offline for now.":"Error: "+x.message}
+  finally{$("#lgs").disabled=false}};
+ $("#lgo").onclick=()=>{d.close();setSync("off")};
+ $("#sync").onclick=()=>{if(!sync.code)showLogin();else pull()}}
+function fillMe(){const sel=$("#me");sel.innerHTML='<option value="">— select —</option>'+owners().map(o=>`<option${o===me()?" selected":""}>${esc(o)}</option>`).join("")}
+function log(msg){S.activity.unshift({at:new Date().toISOString(),who:me()||"Unknown",msg});S.activity=S.activity.slice(0,500);save()}
+function task(id){return S.tasks.find(t=>t.id===id)}
+function blockers(t){return (t.deps||[]).filter(d=>{const p=task(d);return p&&p.status!=="Done"})}
+function overdue(t){return t.status!=="Done"&&D(t.due)<today()}
+function owners(){return [...new Set([...S.team.map(m=>m.name),...S.tasks.map(t=>t.owner)])].filter(Boolean)}
+function phases(){return [...new Set(S.tasks.map(t=>t.phase))].sort((a,b)=>parseFloat(a)-parseFloat(b)||a.localeCompare(b))}
+function pct(){const n=S.tasks.length;return n?Math.round(S.tasks.reduce((a,t)=>a+(t.status==="Done"?100:+t.progress||0),0)/n):0}
+async function init(){
+ const raw=localStorage.getItem(KEY);
+ if(raw){try{S=JSON.parse(raw)}catch(e){}}
+ if(!S){try{const r=await fetch("./data.json",{cache:"no-store"});if(r.ok)S=await r.json()}catch(e){} if(!S)S=clone(SEED)}
+ S.activity=S.activity||[];keyify(S,true);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+ try{sync.base=JSON.parse(localStorage.getItem(KEY+".base")||"null")}catch(e){sync.base=null}
+ if(localStorage.getItem(KEY+".theme")==="dark")document.documentElement.dataset.theme="dark";
+ $("#theme").onclick=()=>{const d=document.documentElement.dataset.theme==="dark";document.documentElement.dataset.theme=d?"":"dark";localStorage.setItem(KEY+".theme",d?"light":"dark")};
+ const sel=$("#me");fillMe();
+ sel.onchange=()=>{localStorage.setItem(KEY+".me",sel.value);trackMe();render()};
+ render();bindLogin();
+ if(sync.code)connect();else{setSync("off");showLogin()}
+}
+const VIEWS={dashboard:"Dashboard",tasks:"Tasks",gantt:"Gantt",calendar:"Calendar",team:"Team",logs:"Logs",reference:"Reference",data:"Data"};
+function render(){
+ $("#nav").innerHTML=Object.entries(VIEWS).map(([k,v])=>`<button data-v="${k}"${k===view?' aria-current="page"':""}>${v}</button>`).join("");
+ $("#nav").querySelectorAll("button").forEach(b=>b.onclick=()=>{view=b.dataset.v;localStorage.setItem(KEY+".view",view);render();$("#app").focus()});
+ $("#app").innerHTML=(R[view]||R.dashboard)();(A[view]||(()=>{}))();
+}
+const R={},A={};
+/* ---------- Dashboard ---------- */
+R.dashboard=()=>{
+ const t0=today(),open=D(S.project.opening),days=Math.ceil((open-t0)/864e5);
+ const by=STATUSES.map(s=>[s,S.tasks.filter(t=>t.status===s).length]);
+ const od=S.tasks.filter(overdue).sort((a,b)=>a.due.localeCompare(b.due));
+ const wk=new Date(t0);wk.setDate(wk.getDate()+7);
+ const dw=S.tasks.filter(t=>t.status!=="Done"&&D(t.due)>=t0&&D(t.due)<=wk);
+ const cr=S.tasks.filter(t=>t.critical),crd=cr.filter(t=>t.status==="Done").length;
+ const ow=owners().map(o=>{const ts=S.tasks.filter(t=>t.owner===o);return [o,ts.length,ts.filter(t=>t.status!=="Done").length]});
+ const mx=Math.max(1,...ow.map(x=>x[1]));
+ const rk=S.raid.filter(r=>r.type==="Risk"&&r.status!=="Closed").sort((a,b)=>(a.impact==="High"?0:1)-(b.impact==="High"?0:1)).slice(0,5);
+ const li=ts=>ts.length?"<ul>"+ts.map(t=>`<li><a href="#" data-edit="${t.id}">${t.id}</a> ${esc(t.name)} <span class="mut small">· ${esc(t.owner)} · ${fmt(t.due)}</span></li>`).join("")+"</ul>":'<p class="mut">None</p>';
+ return `<div class="mut small">${esc(S.project.name)} · ${esc(S.project.address)}</div>
+ <div class="grid">
+ <div class="card"><div class="mut">Opening ${fmt(S.project.opening)}</div><div class="big">${days>=0?days+" days":"Opened"}</div><div class="mut small">to grand opening (target)</div></div>
+ <div class="card"><div class="mut">Overall complete</div><div class="big">${pct()}%</div><div class="bar" role="progressbar" aria-valuenow="${pct()}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct()}%"></i></div></div>
+ <div class="card"><div class="mut">Tasks by status</div>${by.map(([s,n])=>`<div>${s}: <b>${n}</b></div>`).join("")}</div>
+ <div class="card"><div class="mut">Critical path</div><div class="big">${crd}/${cr.length}</div><div class="bar"><i style="width:${cr.length?crd/cr.length*100:0}%;background:var(--crit)"></i></div><div class="small mut">${cr.filter(t=>blockers(t).length===0&&t.status!=="Done").slice(0,3).map(t=>t.id).join(", ")||"—"} next unblocked</div></div>
+ </div>
+ <div class="grid">
+ <div class="card"><h3>Overdue (${od.length})</h3>${li(od)}</div>
+ <div class="card"><h3>Due in next 7 days (${dw.length})</h3>${li(dw)}</div>
+ </div>
+ <div class="grid">
+ <div class="card"><h3>Workload by owner</h3>${ow.map(([o,n,op])=>`<div class="small">${esc(o)} — ${op} open / ${n}</div><div class="bar" style="margin-bottom:.4rem"><i style="width:${n/mx*100}%"></i></div>`).join("")}</div>
+ <div class="card"><h3>Top risks</h3><ul>${rk.map(r=>`<li><b>${esc(r.impact)}</b> ${esc(r.item)} <span class="mut small">· ${esc(r.owner)}</span></li>`).join("")}</ul></div>
+ </div>`};
+A.dashboard=()=>bindEdit();
+function bindEdit(){document.querySelectorAll("[data-edit]").forEach(a=>a.onclick=e=>{e.preventDefault();editTask(a.dataset.edit)})}
+/* ---------- Tasks ---------- */
+function filtered(){const f=ui.f,q=f.q.toLowerCase();let ts=S.tasks.filter(t=>(!f.owner||t.owner===f.owner)&&(!f.phase||t.phase===f.phase)&&(!f.status||t.status===f.status)&&(!f.crit||(f.crit==="y")===!!t.critical)&&(!ui.mine||t.owner===me())&&(!q||(t.id+" "+t.name+" "+t.owner+" "+(t.notes||[]).map(n=>n.text).join(" ")).toLowerCase().includes(q)));
+ const k=ui.sort;return ts.sort((a,b)=>{let x=a[k],y=b[k];if(k==="critical"){x=+x;y=+y}if(k==="progress"){x=+x;y=+y}return (x>y?1:x<y?-1:0)*ui.dir})}
+const opt=(arr,v,all)=>`<option value="">${all}</option>`+arr.map(o=>`<option${o===v?" selected":""}>${esc(o)}</option>`).join("");
+R.tasks=()=>{const f=ui.f,ts=filtered();
+ const flt=`<div class="filters" role="search">
+ <input id="fq" placeholder="Search…" aria-label="Search tasks" value="${esc(f.q)}">
+ <select id="fo" aria-label="Owner">${opt(owners(),f.owner,"All owners")}</select>
+ <select id="fp" aria-label="Phase">${opt(phases(),f.phase,"All phases")}</select>
+ <select id="fs" aria-label="Status">${opt(STATUSES,f.status,"All statuses")}</select>
+ <select id="fc" aria-label="Critical"><option value="">Critical: any</option><option value="y"${f.crit==="y"?" selected":""}>Critical only</option><option value="n"${f.crit==="n"?" selected":""}>Non-critical</option></select>
+ <label class="small" style="margin:0;align-self:center"><input type="checkbox" id="fm"${ui.mine?" checked":""}> My tasks${me()?"":" (pick ‘I am’)"}</label>
+ <button id="mode">${ui.mode==="table"?"Kanban view":"Table view"}</button>
+ <button class="pri" id="add">+ Add task</button><span class="mut small" style="align-self:center">${ts.length} shown</span></div>`;
+ if(ui.mode==="kanban")return `<h2>Tasks</h2>${flt}<div class="kan">${STATUSES.map(s=>`<div class="col" data-s="${s}" aria-label="${s}"><b>${s}</b> <span class="mut small">(${ts.filter(t=>t.status===s).length})</span>${ts.filter(t=>t.status===s).map(t=>`<div class="kc" draggable="true" data-id="${t.id}" tabindex="0"><b>${t.id}</b> ${t.critical?'<span class="chip crit">CP</span>':""}<div>${esc(t.name)}</div><div class="small mut">${esc(t.owner)} · due ${fmt(t.due)}${overdue(t)?' <span class="bad">overdue</span>':""}</div>${blockers(t).length&&t.status!=="Not started"&&t.status!=="Blocked"?`<div class="small warn">⚠ waiting on ${blockers(t).join(", ")}</div>`:""}<div class="bar"><i style="width:${t.status==="Done"?100:t.progress||0}%"></i></div></div>`).join("")}</div>`).join("")}</div><p class="small mut">Drag cards between columns, or focus a card and press Enter to edit.</p>`;
+ const th=(k,l)=>`<th data-k="${k}" aria-sort="${ui.sort===k?(ui.dir>0?"ascending":"descending"):"none"}">${l}${ui.sort===k?(ui.dir>0?" ▲":" ▼"):""}</th>`;
+ return `<h2>Tasks</h2>${flt}<div class="card tw"><table><thead><tr>${th("id","ID")}${th("phase","Phase")}${th("name","Task")}${th("owner","Owner")}${th("start","Start")}${th("due","Due")}${th("status","Status")}${th("progress","%")}${th("critical","CP")}<th>Deps</th><th></th></tr></thead><tbody>
+ ${ts.map(t=>{const b=blockers(t);return `<tr data-id="${t.id}"><td><b>${t.id}</b></td><td class="small">${esc(t.phase)}</td><td contenteditable="true" data-f="name">${esc(t.name)}</td>
+ <td><select data-f="owner" aria-label="Owner">${owners().map(o=>`<option${o===t.owner?" selected":""}>${esc(o)}</option>`).join("")}</select></td>
+ <td><input type="date" data-f="start" value="${t.start}" aria-label="Start"></td><td><input type="date" data-f="due" value="${t.due}" aria-label="Due">${overdue(t)?'<div class="bad small">overdue</div>':""}</td>
+ <td><select data-f="status" aria-label="Status">${STATUSES.map(s=>`<option${s===t.status?" selected":""}>${s}</option>`).join("")}</select>${b.length&&t.status!=="Not started"?`<div class="warn small">⚠ ${b.join(", ")} not done</div>`:""}</td>
+ <td><input type="number" min="0" max="100" step="10" data-f="progress" value="${t.status==="Done"?100:t.progress||0}" style="width:4.5em" aria-label="Progress"></td>
+ <td>${t.critical?'<span class="chip crit">CP</span>':""}</td><td class="small">${(t.deps||[]).map(d=>`<span class="chip ${task(d)&&task(d).status==="Done"?"st-Done":""}">${d}</span>`).join("")}</td>
+ <td style="white-space:nowrap"><button data-edit="${t.id}" aria-label="Edit ${t.id}">✎ ${(t.notes||[]).length||""}</button> <button class="del" data-del="${t.id}" aria-label="Delete ${t.id}">✕</button></td></tr>`}).join("")}
+ </tbody></table></div>`};
+A.tasks=()=>{const f=ui.f;
+ $("#fq").oninput=e=>{f.q=e.target.value;const p=e.target.selectionStart;render();const i=$("#fq");i.focus();i.setSelectionRange(p,p)};
+ [["#fo","owner"],["#fp","phase"],["#fs","status"],["#fc","crit"]].forEach(([s,k])=>$(s).onchange=e=>{f[k]=e.target.value;render()});
+ $("#fm").onchange=e=>{ui.mine=e.target.checked;render()};
+ $("#mode").onclick=()=>{ui.mode=ui.mode==="table"?"kanban":"table";render()};
+ $("#add").onclick=()=>editTask(null);
+ document.querySelectorAll("th[data-k]").forEach(h=>h.onclick=()=>{const k=h.dataset.k;ui.dir=ui.sort===k?-ui.dir:1;ui.sort=k;render()});
+ document.querySelectorAll("tr[data-id] [data-f]").forEach(el=>{const id=el.closest("tr").dataset.id,k=el.dataset.f;
+  const ev=el.isContentEditable?"blur":"change";el.addEventListener(ev,()=>{const v=el.isContentEditable?el.textContent.trim():el.value;setField(id,k,k==="progress"?Math.max(0,Math.min(100,+v||0)):v)})});
+ document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const id=b.dataset.del;if(confirm("Delete task "+id+"?")){S.tasks=S.tasks.filter(t=>t.id!==id);S.tasks.forEach(t=>t.deps=(t.deps||[]).filter(d=>d!==id));log("Deleted task "+id);render()}});
+ bindEdit();
+ document.querySelectorAll(".kc").forEach(c=>{c.ondragstart=e=>e.dataTransfer.setData("text/plain",c.dataset.id);c.onkeydown=e=>{if(e.key==="Enter")editTask(c.dataset.id)};c.ondblclick=()=>editTask(c.dataset.id)});
+ document.querySelectorAll(".col").forEach(c=>{c.ondragover=e=>{e.preventDefault();c.classList.add("over")};c.ondragleave=()=>c.classList.remove("over");c.ondrop=e=>{e.preventDefault();setField(e.dataTransfer.getData("text/plain"),"status",c.dataset.s)}});
+};
+function setField(id,k,v){const t=task(id);if(!t||t[k]===v)return;
+ if(k==="status"&&(v==="In progress"||v==="Done")){const b=blockers(t);if(b.length&&!confirm(`Warning: ${id} depends on ${b.join(", ")} which ${b.length>1?"are":"is"} not Done. Continue?`)){render();return}}
+ const old=t[k];t[k]=v;if(k==="status"&&v==="Done")t.progress=100;if(k==="progress"&&v===100&&t.status!=="Done")t.status="Done";if(k==="progress"&&v>0&&t.status==="Not started")t.status="In progress";
+ log(`${id}: ${k} “${old}” → “${v}”`);render()}
+function editTask(id){const isNew=!id,t=isNew?{id:"",phase:phases()[0]||"",name:"",owner:me()||owners()[0],start:iso(today()),due:iso(today()),deps:[],critical:false,status:"Not started",progress:0,notes:[]}:clone(task(id));
+ const f=$("#dlgf");f.innerHTML=`<h3>${isNew?"Add task":"Edit "+esc(t.id)}</h3>
+ <label>ID</label><input name="id" value="${esc(t.id)}" ${isNew?"required":"readonly"} placeholder="e.g. T32">
+ <label>Task</label><input name="name" value="${esc(t.name)}" required>
+ <label>Phase</label><input name="phase" value="${esc(t.phase)}" list="phl"><datalist id="phl">${phases().map(p=>`<option value="${esc(p)}">`).join("")}</datalist>
+ <label>Owner</label><select name="owner">${owners().map(o=>`<option${o===t.owner?" selected":""}>${esc(o)}</option>`).join("")}</select>
+ <div class="grid" style="gap:.5rem"><div><label>Start</label><input type="date" name="start" value="${t.start}"></div><div><label>Due</label><input type="date" name="due" value="${t.due}"></div></div>
+ <div class="grid" style="gap:.5rem"><div><label>Status</label><select name="status">${STATUSES.map(s=>`<option${s===t.status?" selected":""}>${s}</option>`).join("")}</select></div><div><label>Progress %</label><input type="number" min="0" max="100" name="progress" value="${t.progress||0}"></div></div>
+ <label>Dependencies (comma-separated IDs)</label><input name="deps" value="${esc((t.deps||[]).join(", "))}">
+ <label><input type="checkbox" name="critical" ${t.critical?"checked":""} style="width:auto"> Critical path</label>
+ ${blockers(t).length?`<p class="warn">⚠ Waiting on: ${blockers(t).map(d=>d+" ("+task(d).status+")").join(", ")}</p>`:""}
+ <h4>Notes / comments</h4><div>${(t.notes||[]).map(n=>`<div class="small"><b>${esc(n.who)}</b> <span class="mut">${new Date(n.at).toLocaleString("en-GB")}</span><br>${esc(n.text)}</div>`).join("<hr>")||'<p class="mut small">No notes yet</p>'}</div>
+ <label>Add note</label><textarea name="note" rows="2"></textarea>
+ <p style="display:flex;gap:.5rem;justify-content:flex-end"><button value="cancel" formnovalidate>Cancel</button><button class="pri" value="ok">Save</button></p>`;
+ const dlg=$("#dlg");dlg.showModal();
+ dlg.onclose=()=>{if(dlg.returnValue!=="ok")return;const fd=new FormData(f),nid=(fd.get("id")||"").trim();
+  if(isNew&&(!nid||task(nid))){alert("ID missing or already used");return}
+  const n={...t,id:nid,name:fd.get("name"),phase:fd.get("phase"),owner:fd.get("owner"),start:fd.get("start"),due:fd.get("due"),status:fd.get("status"),progress:+fd.get("progress")||0,deps:String(fd.get("deps")).split(/[,\s]+/).filter(Boolean),critical:!!fd.get("critical")};
+  if(n.status==="Done")n.progress=100;
+  const note=String(fd.get("note")||"").trim();if(note)n.notes=[...(n.notes||[]),{at:new Date().toISOString(),who:me()||"Unknown",text:note}];
+  if(isNew){S.tasks.push(n);log("Added task "+nid)}else{const i=S.tasks.findIndex(x=>x.id===id);S.tasks[i]=n;log("Edited task "+id+(note?" (+note)":""))}
+  render()};
+ dlg.returnValue="";
+}
+/* ---------- Gantt ---------- */
+R.gantt=()=>{const ts=S.tasks.filter(t=>t.start&&t.due);if(!ts.length)return"<p>No tasks</p>";
+ const min=new Date(Math.min(...ts.map(t=>D(t.start))));min.setDate(min.getDate()-min.getDay()+1-7);
+ const max=new Date(Math.max(...ts.map(t=>D(t.due)),D(S.project.opening)));max.setDate(max.getDate()+10);
+ const dpx=7,L=300,rh=22,days=(max-min)/864e5,W=L+days*dpx;let y=30,rows="";
+ const x=d=>L+(d-min)/864e5*dpx;
+ phases().forEach(p=>{rows+=`<rect x="0" y="${y}" width="${W}" height="${rh}" fill="var(--chip)"/><text x="6" y="${y+15}" font-weight="700" font-size="12">${esc(p)}</text>`;y+=rh;
+  ts.filter(t=>t.phase===p).sort((a,b)=>a.start.localeCompare(b.start)).forEach(t=>{const x1=x(D(t.start)),x2=x(D(t.due))+dpx,w=Math.max(4,x2-x1),pr=t.status==="Done"?100:+t.progress||0;
+   const col=t.status==="Done"?"var(--ok)":t.status==="Blocked"?"var(--bad)":t.critical?"var(--crit)":"var(--acc)";
+   rows+=`<g data-edit="${t.id}" style="cursor:pointer"><title>${esc(t.id+" "+t.name+" · "+t.owner+" · "+fmt(t.start)+"–"+fmt(t.due)+" · "+t.status)}</title><text x="14" y="${y+15}" font-size="11">${esc((t.id+" "+t.name).slice(0,44))}</text>
+   <rect x="${x1}" y="${y+4}" width="${w}" height="${rh-8}" rx="3" fill="${col}" opacity="${t.critical?1:.55}" ${t.critical?'stroke="var(--fg)" stroke-width="1.2"':""}/><rect x="${x1}" y="${y+rh-6}" width="${w*pr/100}" height="2" fill="var(--fg)"/></g>`;y+=rh})});
+ let grid="";for(let d=new Date(min);d<=max;d.setDate(d.getDate()+7)){const gx=x(d);grid+=`<line x1="${gx}" y1="20" x2="${gx}" y2="${y}" stroke="var(--line)"/><text x="${gx+2}" y="14" font-size="10">${d.toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</text>`}
+ const tx=x(today()),ox=x(D(S.project.opening));
+ return `<h2>Gantt</h2><p class="small mut">Critical-path bars are solid with an outline; others lighter. Red line = today, green = opening. Click a bar to edit.</p><div class="card tw"><svg width="${W}" height="${y+10}" role="img" aria-label="Gantt chart">${grid}${rows}
+ <line x1="${tx}" y1="20" x2="${tx}" y2="${y}" stroke="var(--bad)" stroke-width="2"/><text x="${tx+3}" y="28" font-size="10" fill="var(--bad)">Today</text>
+ <line x1="${ox}" y1="20" x2="${ox}" y2="${y}" stroke="var(--ok)" stroke-width="2" stroke-dasharray="4 3"/><text x="${ox+3}" y="28" font-size="10">Opening</text></svg></div>`};
+A.gantt=bindEdit;
+/* ---------- Calendar ---------- */
+R.calendar=()=>{const m=ui.calM||new Date(Math.max(today(),D(S.tasks.map(t=>t.due).sort()[0]||iso(today()))));m.setDate(1);ui.calM=m;
+ const first=new Date(m);first.setDate(1-((m.getDay()+6)%7));let cells="";
+ for(let i=0;i<42;i++){const d=new Date(first);d.setDate(first.getDate()+i);const ds=iso(d),ts=S.tasks.filter(t=>t.due===ds&&(!ui.mine||t.owner===me()));
+  const ev=[ds===S.project.opening?'<div class="chip st-Done">Grand opening</div>':"",ds===S.project.softLaunch?'<div class="chip">Soft launch</div>':""].join("");
+  cells+=`<div class="${d.getMonth()!==m.getMonth()?"oth":""} ${ds===iso(today())?"today":""}"><b>${d.getDate()}</b>${ev}${ts.map(t=>`<div><a href="#" data-edit="${t.id}" class="${overdue(t)?"bad":""}">${t.critical?"● ":""}${t.id}</a> ${esc(t.name.slice(0,22))}</div>`).join("")}</div>`}
+ return `<h2>Calendar – ${m.toLocaleDateString("en-GB",{month:"long",year:"numeric"})}</h2><div class="filters"><button id="cp">◀ Prev</button><button id="ct">Today</button><button id="cn">Next ▶</button><label class="small" style="margin:0;align-self:center"><input type="checkbox" id="fm"${ui.mine?" checked":""}> My tasks only</label></div>
+ <div class="cal">${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>`<div class="hd">${d}</div>`).join("")}${cells}</div><p class="small mut">Shows task due dates. ● = critical path.</p>`};
+A.calendar=()=>{const mv=n=>{const d=new Date(ui.calM);d.setMonth(d.getMonth()+n);ui.calM=d;render()};$("#cp").onclick=()=>mv(-1);$("#cn").onclick=()=>mv(1);$("#ct").onclick=()=>{ui.calM=today();render()};$("#fm").onchange=e=>{ui.mine=e.target.checked;render()};bindEdit()};
+/* ---------- Team ---------- */
+R.team=()=>{const m=me();
+ return `<h2>Team</h2>${m?"":'<p class="note">Choose who you are with “I am” at the top to see your tasks. It is remembered in this browser.</p>'}
+ ${m?`<div class="card"><h3>My tasks – ${esc(m)}</h3>${myList(m)}</div>`:""}
+ <div class="grid">${S.team.map(p=>{const ts=S.tasks.filter(t=>t.owner===p.name),d=ts.filter(t=>t.status==="Done").length;return `<div class="card"><h3>${esc(p.name)}</h3><div><b>${esc(p.role)}</b></div><p class="small">${esc(p.areas)}</p><div class="small">${d}/${ts.length} done · ${ts.filter(overdue).length} overdue · ${ts.filter(t=>t.critical).length} critical</div><div class="bar"><i style="width:${ts.length?d/ts.length*100:0}%"></i></div><details><summary class="small">Tasks</summary>${myList(p.name)}</details></div>`}).join("")}</div>`};
+function myList(o){const ts=S.tasks.filter(t=>t.owner===o).sort((a,b)=>a.due.localeCompare(b.due));return ts.length?"<ul>"+ts.map(t=>`<li><a href="#" data-edit="${t.id}">${t.id}</a> ${esc(t.name)} <span class="chip st-${t.status.replace(" ","")}">${t.status}</span> <span class="small ${overdue(t)?"bad":"mut"}">due ${fmt(t.due)}</span>${blockers(t).length?` <span class="small warn">⚠ waits on ${blockers(t).join(", ")}</span>`:""}</li>`).join("")+"</ul>":'<p class="mut">No tasks</p>'}
+A.team=bindEdit;
+/* ---------- Logs ---------- */
+function etable(key,cols,title,blank){const rows=S[key];return `<div class="card tw"><h3>${title}</h3><table><thead><tr>${cols.map(c=>`<th>${c[1]}</th>`).join("")}<th></th></tr></thead><tbody>${rows.map((r,i)=>`<tr>${cols.map(([k,,opts])=>opts?`<td><select data-t="${key}" data-i="${i}" data-k="${k}" aria-label="${k}">${opts.map(o=>`<option${o===r[k]?" selected":""}>${o}</option>`).join("")}</select></td>`:`<td contenteditable="true" data-t="${key}" data-i="${i}" data-k="${k}">${esc(r[k])}</td>`).join("")}<td><button class="del" data-rm="${key}" data-i="${i}" aria-label="Delete row">✕</button></td></tr>`).join("")}</tbody></table><button data-addrow="${key}" data-blank='${esc(JSON.stringify(blank))}'>+ Add</button></div>`}
+R.logs=()=>`<h2>Logs</h2><p class="small mut">Click a cell to edit. Changes save automatically and are recorded in the activity log.</p>
+ ${etable("raid",[["id","ID"],["type","Type",["Risk","Assumption","Issue","Decision"]],["item","Item"],["impact","Impact",["","High","Medium","Low"]],["mitigation","Mitigation / note"],["owner","Owner"],["status","Status",["Open","Proposed","Agreed","Mitigated","Closed"]]],"RAID log (risks, assumptions, issues, decisions)",{id:"N"+(S.raid.length+1),type:"Risk",item:"",impact:"Medium",mitigation:"",owner:me(),status:"Open"})}
+ ${etable("questions",[["id","ID"],["question","Question"],["owner","Owner"],["needed","Needed by"],["status","Status",["Open","Answered","Closed"]],["answer","Answer / decision"]],"Open questions",{id:"Q"+(S.questions.length+1),question:"",owner:me(),needed:"",status:"Open",answer:""})}
+ <div class="card"><h3>Launch readiness checklist (${S.checklist.filter(c=>c.done).length}/${S.checklist.length})</h3>${S.checklist.map((c,i)=>`<div><label style="color:var(--fg);font-size:1rem"><input type="checkbox" data-ck="${i}"${c.done?" checked":""}> ${esc(c.text)}</label>${c.done&&c.by?`<span class="small mut"> — ${esc(c.by)}, ${new Date(c.at).toLocaleDateString("en-GB")}</span>`:""}</div>`).join("")}</div>
+ <div class="card"><h3>Activity log</h3><div style="max-height:300px;overflow:auto">${S.activity.slice(0,200).map(a=>`<div class="small"><span class="mut">${new Date(a.at).toLocaleString("en-GB")}</span> <b>${esc(a.who)}</b> ${esc(a.msg)}</div>`).join("")||'<p class="mut">No activity yet</p>'}</div></div>`;
+A.logs=()=>{document.querySelectorAll("[data-t]").forEach(el=>{const ev=el.isContentEditable?"blur":"change";el.addEventListener(ev,()=>{const r=S[el.dataset.t][+el.dataset.i],k=el.dataset.k,v=el.isContentEditable?el.textContent.trim():el.value;if(r[k]!==v){r[k]=v;log(`${el.dataset.t} ${r.id}: ${k} → “${v}”`);if(!el.isContentEditable)render()}})});
+ document.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{const a=S[b.dataset.rm],r=a[+b.dataset.i];if(confirm("Delete "+r.id+"?")){a.splice(+b.dataset.i,1);log("Deleted "+b.dataset.rm+" "+r.id);render()}});
+ document.querySelectorAll("[data-addrow]").forEach(b=>b.onclick=()=>{const r=JSON.parse(b.dataset.blank);S[b.dataset.addrow].push(r);log("Added "+b.dataset.addrow+" "+r.id);render()});
+ document.querySelectorAll("[data-ck]").forEach(c=>c.onchange=()=>{const it=S.checklist[+c.dataset.ck];it.done=c.checked;it.by=me()||"Unknown";it.at=new Date().toISOString();log((c.checked?"Ticked":"Unticked")+" checklist: "+it.text);render()})};
+/* ---------- Reference ---------- */
+R.reference=()=>{const b=S.brand;const cats=[...new Set(S.menu.map(m=>m.category))];
+ return `<h2>Reference</h2>
+ <div class="card"><h3>Menu & pricing <span class="chip">Draft “Super Chicken” mock-up – working menu name only</span></h3><p class="small mut">Prices are editable (click a price). Draft prices, not validated.</p><div class="grid">${cats.map(c=>`<div><h4>${esc(c)}</h4><table>${S.menu.map((m,i)=>m.category===c?`<tr><td>${esc(m.item)}</td><td contenteditable="true" data-mp="${i}" style="text-align:right;white-space:nowrap">${esc(m.price)}</td></tr>`:"").join("")}</table></div>`).join("")}</div></div>
+ <div class="card tw"><h3>KPIs <span class="chip">Proposed targets – not validated</span></h3><table><thead><tr><th>Level</th><th>KPI</th><th>Target (proposed)</th><th>Cadence</th></tr></thead><tbody>${S.kpis.map(k=>`<tr><td>${esc(k.level)}</td><td>${esc(k.kpi)}</td><td>${esc(k.target)}</td><td>${esc(k.cadence)}</td></tr>`).join("")}</tbody></table></div>
+ <div class="card"><h3>Catchment highlights</h3><ul>${S.catchment.map(c=>`<li>${esc(c)}</li>`).join("")}</ul><p class="small mut">Sources as cited in the Business Requirements Document (Census 2021, IoD 2019, postcodes.io). Distances are straight-line estimates.</p></div>
+ <div class="card"><h3>Brand proposals <span class="chip">PROPOSALS – no decision made</span></h3><p class="small">${esc(b.note)}</p><table>${b.names.map(n=>`<tr><td><b>${esc(n[0])}</b></td><td class="small">${esc(n[1])}</td></tr>`).join("")}</table><div class="grid" style="margin-top:1rem">${b.styles.map(s=>`<div><b>${esc(s.name)}</b><div>${s.palette.map(c=>`<span class="sw" style="background:${esc(c)}" title="${esc(c)}"></span>`).join(" ")}</div><div class="small">${esc(s.palette.join(" · "))}</div><div class="small">Type: ${esc(s.type)}</div><div class="small mut">Tone: ${esc(s.tone)}</div></div>`).join("")}</div></div>`};
+A.reference=()=>document.querySelectorAll("[data-mp]").forEach(el=>el.onblur=()=>{const m=S.menu[+el.dataset.mp],v=el.textContent.trim();if(v!==m.price){const o=m.price;m.price=v;log(`Menu price ${m.item}: ${o} → ${v}`)}});
+/* ---------- Data ---------- */
+R.data=()=>`<h2>Data</h2>
+ <div class="note">${sync.code?`<b>Shared and live.</b> Changes save to the team database and appear for everyone within a second or two. A copy is kept in this browser, so you can keep working offline; changes sync when you reconnect.`:`<b>Not joined.</b> You're working on a copy in this browser only. Join with the team passcode to share changes with everyone.`}</div>
+ <div class="grid" style="margin-top:1rem">
+ <div class="card"><h3>Sharing</h3><p class="small">Status: <b>${esc($("#sync").textContent.replace("● ",""))}</b>${sync.peers.length?"<br>Online now: "+esc(sync.peers.join(", ")):""}</p>${sync.code?'<p><button id="so">Sign out of this browser</button></p>':'<p><button id="si" class="pri">Join with passcode</button></p>'}${localStorage.getItem(KEY+".presync")?'<p class="small">This browser had its own copy from before it joined. <button id="xb">Download that old copy</button></p>':""}</div>
+ <div class="card"><h3>Export</h3><p><button id="xj" class="pri">Export JSON (full backup)</button></p><p><button id="xc">Export tasks CSV</button></p><p><button id="xi">Export deadlines (.ics)</button></p></div>
+ <div class="card"><h3>Import</h3><p class="small">Replace all data with a previously exported JSON file.${sync.code?" <b>This replaces it for everyone.</b>":""}</p><input type="file" id="ij" accept=".json,application/json" aria-label="Import JSON"></div>
+ <div class="card"><h3>Reset</h3><p class="small">Restore the seed data (38 tasks). ${sync.code?"<b>This wipes everyone's changes</b> – export first.":"Your changes in this browser will be lost – export first."}</p><button id="rs" class="del">Reset to defaults</button></div>
+ </div><p class="small mut">Last saved: ${new Date().toLocaleString("en-GB")} · ${S.tasks.length} tasks · ${S.activity.length} activity entries.</p>`;
+function dl(name,text,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+function csv(){const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"',h=["id","phase","name","owner","start","due","status","progress","critical","deps","notes"];
+ return "\ufeff"+[h.join(","),...S.tasks.map(t=>[t.id,t.phase,t.name,t.owner,t.start,t.due,t.status,t.progress,t.critical?"yes":"no",(t.deps||[]).join(" "),(t.notes||[]).map(n=>n.who+": "+n.text).join(" | ")].map(q).join(","))].join("\r\n")}
+function ics(){const e=s=>String(s).replace(/[\\;,]/g,m=>"\\"+m).replace(/\n/g,"\\n"),st=new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z";
+ const ev=(uid,d,sum,desc)=>{const n=D(d);n.setDate(n.getDate()+1);return ["BEGIN:VEVENT","UID:"+uid+"@norwood-hq","DTSTAMP:"+st,"DTSTART;VALUE=DATE:"+d.replace(/-/g,""),"DTEND;VALUE=DATE:"+iso(n).replace(/-/g,""),"SUMMARY:"+e(sum),"DESCRIPTION:"+e(desc),"END:VEVENT"].join("\r\n")};
+ return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Norwood HQ//EN","CALSCALE:GREGORIAN",...S.tasks.map(t=>ev(t.id,t.due,`Due: ${t.id} ${t.name}`,`Owner: ${t.owner}\nPhase: ${t.phase}\nStatus: ${t.status}${t.critical?"\nCritical path":""}`)),ev("opening",S.project.opening,"Grand opening – "+S.project.name,S.project.address),"END:VCALENDAR"].join("\r\n")}
+A.data=()=>{$("#xj").onclick=()=>dl("norwood-hq-"+iso(new Date())+".json",JSON.stringify(S,null,1),"application/json");$("#xc").onclick=()=>dl("norwood-tasks.csv",csv(),"text/csv");$("#xi").onclick=()=>dl("norwood-deadlines.ics",ics(),"text/calendar");
+ const who=sync.code?"for everyone":"in this browser";
+ $("#ij").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.tasks))throw 0;if(confirm("Replace all data "+who+" with "+f.name+"?")){S=d;S.activity=S.activity||[];keyify(S);log("Imported "+f.name);render()}}catch(x){alert("Not a valid Norwood HQ JSON file")}};r.readAsText(f)};
+ $("#rs").onclick=()=>{if(confirm("Reset all data to defaults "+who+"?")){S=clone(SEED);S.activity=[];keyify(S,true);log("Reset to defaults");render()}};
+ if($("#so"))$("#so").onclick=()=>{if(confirm("Sign out? This browser keeps its copy but stops syncing until you join again.")){needLogin("");$("#login").close();render()}};
+ if($("#si"))$("#si").onclick=()=>showLogin();
+ if($("#xb"))$("#xb").onclick=()=>dl("norwood-hq-old-local-copy.json",localStorage.getItem(KEY+".presync"),"application/json")};
+init();
+</script>
+</body>
+</html>

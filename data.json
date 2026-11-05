@@ -1,0 +1,1145 @@
+{
+ "version": 1,
+ "project": {
+  "name": "Norwood Pilot Store (working name TBC)",
+  "address": "409 Herries Road, Sheffield S5 7HF",
+  "opening": "2027-03-05",
+  "softLaunch": "2027-03-01"
+ },
+ "team": [
+  {
+   "name": "Fanshad",
+   "role": "Finance and Project Head",
+   "areas": "Budget, lease, contracts, approvals, tech spend, hiring sign-off, buffer"
+  },
+  {
+   "name": "Nishaf",
+   "role": "Operations and local support",
+   "areas": "Council, suppliers, builders and workers, strip-out, fit-out, electrical, gas G01–G07, equipment"
+  },
+  {
+   "name": "Sooraj",
+   "role": "Sales, Marketing and Branding",
+   "areas": "Brand, artwork, social, pre-launch, grand opening"
+  },
+  {
+   "name": "Mammad",
+   "role": "Kitchen, SOPs and Sales",
+   "areas": "Layout and stations, menu and recipes, kit spec, food registration, soft launch"
+  },
+  {
+   "name": "Malik",
+   "role": "Staff Head",
+   "areas": "Hiring crew, training academy, food safety and allergens, stock management"
+  }
+ ],
+ "tasks": [
+  {
+   "id": "T01",
+   "phase": "1 Site & regulatory",
+   "name": "Confirm lease terms, ownership and permitted use with landlord/solicitor",
+   "owner": "Fanshad",
+   "start": "2026-11-09",
+   "due": "2026-11-20",
+   "deps": [],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T02",
+   "phase": "1 Site & regulatory",
+   "name": "Email Sheffield City Council planning to confirm Class E position (hot food takeaway element)",
+   "owner": "Nishaf",
+   "start": "2026-11-09",
+   "due": "2026-11-13",
+   "deps": [],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T03",
+   "phase": "1 Site & regulatory",
+   "name": "Planning/regulatory sign-off decision recorded (gating item for strip-out)",
+   "owner": "Fanshad",
+   "start": "2026-11-16",
+   "due": "2026-12-18",
+   "deps": [
+    "T02"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T04",
+   "phase": "1 Site & regulatory",
+   "name": "Measured survey and condition report (walls, ceilings, services, drainage)",
+   "owner": "Nishaf",
+   "start": "2026-11-16",
+   "due": "2026-11-27",
+   "deps": [
+    "T01"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T05",
+   "phase": "1 Site & regulatory",
+   "name": "Building Regulations route agreed and fire risk approach",
+   "owner": "Nishaf",
+   "start": "2026-11-30",
+   "due": "2026-12-18",
+   "deps": [
+    "T04"
+   ],
+   "critical": false,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "G01",
+   "phase": "6a Gas supply",
+   "name": "Confirm with gas supplier/network whether a meter is present or needs installing; get MPRN and lead time",
+   "owner": "Nishaf",
+   "start": "2026-11-09",
+   "due": "2026-11-20",
+   "deps": [],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "G02",
+   "phase": "6a Gas supply",
+   "name": "Book meter installation/reconnection and supply activation",
+   "owner": "Nishaf",
+   "start": "2026-11-23",
+   "due": "2026-12-11",
+   "deps": [
+    "G01"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "G03",
+   "phase": "6a Gas supply",
+   "name": "Meter fitted and supply live",
+   "owner": "Nishaf",
+   "start": "2026-12-14",
+   "due": "2027-01-29",
+   "deps": [
+    "G02"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "G04",
+   "phase": "6a Gas supply",
+   "name": "Connect existing internal gas line to the meter (Gas Safe engineer)",
+   "owner": "Nishaf",
+   "start": "2027-02-01",
+   "due": "2027-02-05",
+   "deps": [
+    "G03",
+    "T15"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "G05",
+   "phase": "6a Gas supply",
+   "name": "Pipework alterations and runs to each appliance",
+   "owner": "Nishaf",
+   "start": "2027-02-01",
+   "due": "2027-02-12",
+   "deps": [
+    "T07",
+    "G04"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "G06",
+   "phase": "6a Gas supply",
+   "name": "Gas interlock with extraction installed",
+   "owner": "Nishaf",
+   "start": "2027-02-08",
+   "due": "2027-02-12",
+   "deps": [
+    "T17",
+    "G05"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "G07",
+   "phase": "6a Gas supply",
+   "name": "Tightness test, Gas Safe commissioning and certificate",
+   "owner": "Nishaf",
+   "start": "2027-02-15",
+   "due": "2027-02-19",
+   "deps": [
+    "G06",
+    "T22"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T06",
+   "phase": "2 Design & brand",
+   "name": "Brand name and identity chosen from options; trademark search",
+   "owner": "Sooraj",
+   "start": "2026-11-09",
+   "due": "2026-11-27",
+   "deps": [],
+   "critical": false,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T07",
+   "phase": "2 Design & brand",
+   "name": "Store layout: eat-in, counter, rider zone, kitchen stations, extraction and gas route",
+   "owner": "Mammad",
+   "start": "2026-11-23",
+   "due": "2026-12-11",
+   "deps": [
+    "T04"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T08",
+   "phase": "2 Design & brand",
+   "name": "Menu v1 lock: recipes, specs, spice scale, costing",
+   "owner": "Mammad",
+   "start": "2026-11-16",
+   "due": "2026-12-18",
+   "deps": [
+    "T06"
+   ],
+   "critical": false,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T09",
+   "phase": "2 Design & brand",
+   "name": "Signage, menu boards, packaging, uniform artwork",
+   "owner": "Sooraj",
+   "start": "2026-12-07",
+   "due": "2027-01-15",
+   "deps": [
+    "T06",
+    "T08"
+   ],
+   "critical": false,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T10",
+   "phase": "3 Procurement",
+   "name": "Contractor tender, select and sign contract with programme",
+   "owner": "Fanshad",
+   "start": "2026-12-07",
+   "due": "2026-12-23",
+   "deps": [
+    "T07"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T11",
+   "phase": "3 Procurement",
+   "name": "Order long-lead kit: fryers, grill, pizza oven, plancha, extraction canopy, refrigeration, soft-serve",
+   "owner": "Mammad",
+   "start": "2026-12-14",
+   "due": "2026-12-23",
+   "deps": [
+    "T07"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T12",
+   "phase": "3 Procurement",
+   "name": "Suppliers: chicken, beef, tallow/canola blend, dough/cheese, packaging, drinks",
+   "owner": "Nishaf",
+   "start": "2026-12-07",
+   "due": "2027-01-29",
+   "deps": [
+    "T08"
+   ],
+   "critical": false,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T13",
+   "phase": "3 Procurement",
+   "name": "Tech stack: POS, kiosk, KDS, printer, card readers, delivery aggregator accounts",
+   "owner": "Fanshad",
+   "start": "2027-01-04",
+   "due": "2027-02-05",
+   "deps": [
+    "T06"
+   ],
+   "critical": false,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T14",
+   "phase": "4 Strip-out",
+   "name": "Strip-out of walls, ceilings and old grocery fixtures; waste removal",
+   "owner": "Nishaf",
+   "start": "2027-01-04",
+   "due": "2027-01-15",
+   "deps": [
+    "T03",
+    "T10"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T15",
+   "phase": "5 Fit-out",
+   "name": "First fix: electrical rewiring, plumbing, drainage, grease trap",
+   "owner": "Nishaf",
+   "start": "2027-01-18",
+   "due": "2027-01-29",
+   "deps": [
+    "T14"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T16",
+   "phase": "5 Fit-out",
+   "name": "Walls, ceilings, hygienic cladding, flooring, lighting",
+   "owner": "Nishaf",
+   "start": "2027-01-25",
+   "due": "2027-02-12",
+   "deps": [
+    "T15"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T17",
+   "phase": "6 Compliance",
+   "name": "Kitchen extraction and ventilation installed and commissioned",
+   "owner": "Nishaf",
+   "start": "2027-01-25",
+   "due": "2027-02-12",
+   "deps": [
+    "T11",
+    "T15"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T18",
+   "phase": "6 Compliance",
+   "name": "Electrical certificate, fire alarm and emergency lighting sign-off",
+   "owner": "Nishaf",
+   "start": "2027-02-08",
+   "due": "2027-02-19",
+   "deps": [
+    "T16",
+    "T17"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T19",
+   "phase": "6 Compliance",
+   "name": "Food business registration with council (28+ days before opening)",
+   "owner": "Mammad",
+   "start": "2027-01-11",
+   "due": "2027-01-29",
+   "deps": [
+    "T01"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T20",
+   "phase": "6 Compliance",
+   "name": "Food safety management (HACCP/SFBB), allergen matrix, pest control",
+   "owner": "Malik",
+   "start": "2027-01-18",
+   "due": "2027-02-19",
+   "deps": [
+    "T08"
+   ],
+   "critical": false,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T21",
+   "phase": "6 Compliance",
+   "name": "Licensing check: late-night refreshment, signage consent",
+   "owner": "Fanshad",
+   "start": "2026-12-07",
+   "due": "2027-01-29",
+   "deps": [
+    "T03"
+   ],
+   "critical": false,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T22",
+   "phase": "7 Equipment",
+   "name": "Equipment delivery, install, commissioning; test cooks",
+   "owner": "Nishaf",
+   "start": "2027-02-08",
+   "due": "2027-02-19",
+   "deps": [
+    "T11",
+    "T16"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T23",
+   "phase": "8 People",
+   "name": "Hire store manager and shift leads",
+   "owner": "Fanshad",
+   "start": "2026-12-07",
+   "due": "2027-01-22",
+   "deps": [],
+   "critical": false,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T24",
+   "phase": "8 People",
+   "name": "Hire crew (kitchen and front of house), right-to-work checks",
+   "owner": "Malik",
+   "start": "2027-01-11",
+   "due": "2027-02-12",
+   "deps": [
+    "T23"
+   ],
+   "critical": false,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T25",
+   "phase": "8 People",
+   "name": "Training: food safety, station recipes, service rituals, POS/KDS",
+   "owner": "Malik",
+   "start": "2027-02-15",
+   "due": "2027-02-26",
+   "deps": [
+    "T22",
+    "T24",
+    "G07"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T31",
+   "phase": "8 People",
+   "name": "Stock management: supplier ordering, stock counts, par levels, wastage logging",
+   "owner": "Malik",
+   "start": "2027-02-01",
+   "due": "2027-02-19",
+   "deps": [
+    "T08",
+    "T12"
+   ],
+   "critical": false,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T26",
+   "phase": "9 Marketing",
+   "name": "Social accounts, Google Business Profile, local launch content",
+   "owner": "Sooraj",
+   "start": "2027-01-11",
+   "due": "2027-02-26",
+   "deps": [
+    "T06"
+   ],
+   "critical": false,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T27",
+   "phase": "9 Marketing",
+   "name": "Pre-launch: leaflet drop, local partners, opening offer",
+   "owner": "Sooraj",
+   "start": "2027-02-08",
+   "due": "2027-02-26",
+   "deps": [
+    "T09"
+   ],
+   "critical": false,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T28",
+   "phase": "10 Buffer",
+   "name": "Programme buffer (2 weeks) absorbed by slippage only",
+   "owner": "Fanshad",
+   "start": "2027-02-15",
+   "due": "2027-02-26",
+   "deps": [
+    "T18",
+    "T22",
+    "G07"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T29",
+   "phase": "11 Launch",
+   "name": "Soft launch (friends, family, invited locals; limited menu)",
+   "owner": "Mammad",
+   "start": "2027-03-01",
+   "due": "2027-03-03",
+   "deps": [
+    "T18",
+    "T19",
+    "T25",
+    "G07"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  },
+  {
+   "id": "T30",
+   "phase": "11 Launch",
+   "name": "Grand opening and delivery apps live",
+   "owner": "Sooraj",
+   "start": "2027-03-05",
+   "due": "2027-03-06",
+   "deps": [
+    "T29"
+   ],
+   "critical": true,
+   "status": "Not started",
+   "progress": 0,
+   "notes": []
+  }
+ ],
+ "raid": [
+  {
+   "id": "R1",
+   "type": "Risk",
+   "item": "Planning/use position delayed or not Class E",
+   "impact": "High",
+   "mitigation": "Ask council in week 1 (T02); re-baseline if application needed",
+   "owner": "Fanshad",
+   "status": "Open"
+  },
+  {
+   "id": "R2",
+   "type": "Risk",
+   "item": "Gas meter install/reconnection lead time",
+   "impact": "High",
+   "mitigation": "Contact supplier/GDN in Nov (G01); consider electric for some stations",
+   "owner": "Nishaf",
+   "status": "Open"
+  },
+  {
+   "id": "R3",
+   "type": "Risk",
+   "item": "Equipment and extraction lead times",
+   "impact": "High",
+   "mitigation": "Order by 23 Dec; delivery dates in writing",
+   "owner": "Mammad",
+   "status": "Open"
+  },
+  {
+   "id": "R4",
+   "type": "Risk",
+   "item": "Contractor slippage over Christmas/January",
+   "impact": "High",
+   "mitigation": "Fixed programme, weekly site meetings, 2-week buffer",
+   "owner": "Nishaf",
+   "status": "Open"
+  },
+  {
+   "id": "R5",
+   "type": "Risk",
+   "item": "Hidden condition issues after strip-out",
+   "impact": "Medium",
+   "mitigation": "Intrusive survey in Nov; contingency",
+   "owner": "Nishaf",
+   "status": "Open"
+  },
+  {
+   "id": "R6",
+   "type": "Risk",
+   "item": "Brand not cleared in time for signage",
+   "impact": "Medium",
+   "mitigation": "Decide by 27 Nov; trademark search in parallel",
+   "owner": "Sooraj",
+   "status": "Open"
+  },
+  {
+   "id": "R7",
+   "type": "Risk",
+   "item": "Price sensitivity in a deprived area",
+   "impact": "Medium",
+   "mitigation": "Meal deals; test prices in soft launch",
+   "owner": "Sooraj",
+   "status": "Open"
+  },
+  {
+   "id": "R8",
+   "type": "Risk",
+   "item": "Hiring shortfall",
+   "impact": "Medium",
+   "mitigation": "Start manager hire in Dec",
+   "owner": "Malik",
+   "status": "Open"
+  },
+  {
+   "id": "A1",
+   "type": "Assumption",
+   "item": "User believes the use falls under Class E; to confirm with council",
+   "impact": "",
+   "mitigation": "",
+   "owner": "Fanshad",
+   "status": "Open"
+  },
+  {
+   "id": "A2",
+   "type": "Assumption",
+   "item": "Electric supply adequate; rewiring only",
+   "impact": "",
+   "mitigation": "",
+   "owner": "Nishaf",
+   "status": "Open"
+  },
+  {
+   "id": "A3",
+   "type": "Assumption",
+   "item": "KPI and cost targets are planning ranges, not validated",
+   "impact": "",
+   "mitigation": "",
+   "owner": "Fanshad",
+   "status": "Open"
+  },
+  {
+   "id": "A4",
+   "type": "Assumption",
+   "item": "Lease permits the works and hot food use",
+   "impact": "",
+   "mitigation": "",
+   "owner": "Fanshad",
+   "status": "Open"
+  },
+  {
+   "id": "I1",
+   "type": "Issue",
+   "item": "Internal gas line not connected to a meter or supply",
+   "impact": "High",
+   "mitigation": "G01–G07",
+   "owner": "Nishaf",
+   "status": "Open"
+  },
+  {
+   "id": "I2",
+   "type": "Issue",
+   "item": "Brand name and identity not chosen",
+   "impact": "Medium",
+   "mitigation": "T06",
+   "owner": "Sooraj",
+   "status": "Open"
+  },
+  {
+   "id": "D1",
+   "type": "Decision",
+   "item": "Strip-out does not start before planning/regulatory sign-off",
+   "impact": "",
+   "mitigation": "",
+   "owner": "Fanshad",
+   "status": "Proposed"
+  },
+  {
+   "id": "D2",
+   "type": "Decision",
+   "item": "Pilot is company-owned and the training store",
+   "impact": "",
+   "mitigation": "",
+   "owner": "Fanshad",
+   "status": "Proposed"
+  },
+  {
+   "id": "D3",
+   "type": "Decision",
+   "item": "Next-phase drinks and pizza expansion out of pilot scope",
+   "impact": "",
+   "mitigation": "",
+   "owner": "Leadership team",
+   "status": "Proposed"
+  }
+ ],
+ "questions": [
+  {
+   "id": "Q1",
+   "question": "Brand name and style direction (A, B, C or other)",
+   "owner": "Sooraj",
+   "needed": "2026-11-27",
+   "status": "Open",
+   "answer": ""
+  },
+  {
+   "id": "Q2",
+   "question": "Is 'Super Chicken' a contender or mock-up only?",
+   "owner": "Sooraj",
+   "needed": "2026-11-27",
+   "status": "Open",
+   "answer": ""
+  },
+  {
+   "id": "Q3",
+   "question": "Halal certification (chicken, beef, beef tallow) and allergen disclosure",
+   "owner": "Mammad",
+   "needed": "2026-12-18",
+   "status": "Open",
+   "answer": ""
+  },
+  {
+   "id": "Q4",
+   "question": "Total budget and contingency",
+   "owner": "Fanshad",
+   "needed": "2026-11-20",
+   "status": "Open",
+   "answer": ""
+  },
+  {
+   "id": "Q5",
+   "question": "External architect and contractor appointed",
+   "owner": "Nishaf",
+   "needed": "2026-12-23",
+   "status": "Open",
+   "answer": ""
+  },
+  {
+   "id": "Q6",
+   "question": "Planning confirmation (Class E) from council",
+   "owner": "Nishaf",
+   "needed": "2026-11-13",
+   "status": "Open",
+   "answer": ""
+  },
+  {
+   "id": "Q7",
+   "question": "Lease holder and terms",
+   "owner": "Fanshad",
+   "needed": "2026-11-20",
+   "status": "Open",
+   "answer": ""
+  },
+  {
+   "id": "Q8",
+   "question": "Trading after 23:00?",
+   "owner": "Fanshad",
+   "needed": "2026-12-31",
+   "status": "Open",
+   "answer": ""
+  }
+ ],
+ "menu": [
+  {
+   "category": "Fried chicken",
+   "item": "Original 2pc",
+   "price": "£5.50"
+  },
+  {
+   "category": "Fried chicken",
+   "item": "Original 3pc",
+   "price": "£7.00"
+  },
+  {
+   "category": "Fried chicken",
+   "item": "Nashville hot 2pc",
+   "price": "£6.00"
+  },
+  {
+   "category": "Fried chicken",
+   "item": "Nashville hot 3pc",
+   "price": "£7.50"
+  },
+  {
+   "category": "Fried chicken",
+   "item": "Tenders 3pc",
+   "price": "£5.50"
+  },
+  {
+   "category": "Fried chicken",
+   "item": "Tenders 5pc",
+   "price": "£8.00"
+  },
+  {
+   "category": "Fried chicken",
+   "item": "Wings 6pc",
+   "price": "£5.50"
+  },
+  {
+   "category": "Fried chicken",
+   "item": "Wings 10pc",
+   "price": "£8.50"
+  },
+  {
+   "category": "Flame-grilled",
+   "item": "Quarter chicken",
+   "price": "£5.75"
+  },
+  {
+   "category": "Flame-grilled",
+   "item": "Half chicken",
+   "price": "£9.50"
+  },
+  {
+   "category": "Flame-grilled",
+   "item": "Full chicken",
+   "price": "£16.50"
+  },
+  {
+   "category": "Burgers",
+   "item": "Smash burger",
+   "price": "£6.50"
+  },
+  {
+   "category": "Burgers",
+   "item": "Fried chicken / tender burger",
+   "price": "£7.00"
+  },
+  {
+   "category": "Sides",
+   "item": "Tender + mac n cheese",
+   "price": "£6.50"
+  },
+  {
+   "category": "Sides",
+   "item": "Loaded fries",
+   "price": "£5.50"
+  },
+  {
+   "category": "Sides",
+   "item": "Fries regular",
+   "price": "£3.00"
+  },
+  {
+   "category": "Sides",
+   "item": "Fries large",
+   "price": "£3.75"
+  },
+  {
+   "category": "Pizza",
+   "item": "Rotating selection",
+   "price": "from £6.00"
+  },
+  {
+   "category": "Dessert & drinks",
+   "item": "Soft serve",
+   "price": "£3.00"
+  },
+  {
+   "category": "Dessert & drinks",
+   "item": "Milkshakes",
+   "price": "£4.50"
+  },
+  {
+   "category": "Dessert & drinks",
+   "item": "Fizzy drinks",
+   "price": "£2.20"
+  },
+  {
+   "category": "Sauces",
+   "item": "Extra sauce pot",
+   "price": "£0.75"
+  },
+  {
+   "category": "Next phase",
+   "item": "Mojito / Super Lemonade, Narunandi Drink, Milk Sarbath",
+   "price": "Not priced"
+  }
+ ],
+ "kpis": [
+  {
+   "level": "Store",
+   "kpi": "Food cost %",
+   "target": "28–32% blended",
+   "cadence": "Weekly"
+  },
+  {
+   "level": "Store",
+   "kpi": "Labour cost %",
+   "target": "22–28%",
+   "cadence": "Weekly"
+  },
+  {
+   "level": "Store",
+   "kpi": "Prime cost %",
+   "target": "Under 60%",
+   "cadence": "Weekly"
+  },
+  {
+   "level": "Store",
+   "kpi": "Waste",
+   "target": "Under 3% of purchases",
+   "cadence": "Weekly"
+  },
+  {
+   "level": "Store",
+   "kpi": "Speed of service",
+   "target": "Under 5 min counter; delivery ready under 10 min",
+   "cadence": "Daily"
+  },
+  {
+   "level": "Store",
+   "kpi": "Order accuracy",
+   "target": "98% or more",
+   "cadence": "Weekly"
+  },
+  {
+   "level": "Store",
+   "kpi": "Ratings / NPS",
+   "target": "4.5+ / +50",
+   "cadence": "Weekly"
+  },
+  {
+   "level": "Store",
+   "kpi": "Hygiene rating",
+   "target": "FSA 5",
+   "cadence": "Each inspection"
+  },
+  {
+   "level": "Store",
+   "kpi": "Brand standards audit",
+   "target": "95% or more",
+   "cadence": "Monthly"
+  },
+  {
+   "level": "Brand",
+   "kpi": "New-store ramp",
+   "target": "Pilot run-rate within 12 weeks",
+   "cadence": "Monthly"
+  },
+  {
+   "level": "Brand",
+   "kpi": "Audit consistency",
+   "target": "All stores within 5 points",
+   "cadence": "Monthly"
+  },
+  {
+   "level": "Brand",
+   "kpi": "Pipeline",
+   "target": "2x next phase in vetted sites",
+   "cadence": "Monthly"
+  }
+ ],
+ "catchment": [
+  "S5 7HF is in Burngreave ward (LSOA E01007943), on the edge of Firth Park ward (postcodes.io).",
+  "Burngreave: 27,288 residents, 9,457 households, 2.89 per household, 27.0% under 16 (Census 2021).",
+  "43.7% of Burngreave households have no car or van; Firth Park 39.1% (Census 2021).",
+  "LSOA E01007943 among the 2% most deprived in England (IoD 2019, decile 1).",
+  "46.5% of Burngreave residents identified as Muslim vs 10.3% Sheffield (Census 2021) – halal-demand indicator only.",
+  "Anchors: Tesco Southey Superstore + petrol next door; Well Pharmacy on parade; Norwood Medical Centre ~170 m; 3 primary schools within ~400 m; D & K Dental ~410 m; Texaco ~230 m; Northern General Hospital ~1.1 km (estimates, straight-line).",
+  "Nearest KFC ~1.6 km (822 Barnsley Rd); local independents rated 3.3–4.5; no Popeyes/Nando's/Domino's/Pizza Hut verified within 1 mile."
+ ],
+ "brand": {
+  "note": "Proposals awaiting leadership decision. Names need trademark check.",
+  "names": [
+   [
+    "Northcrumb",
+    "No exact UK food brand found (quick search); needs trademark check"
+   ],
+   [
+    "Steel & Spice",
+    "No exact UK food brand found; needs trademark check"
+   ],
+   [
+    "Kindle & Crust",
+    "No exact UK food brand found; needs trademark check"
+   ],
+   [
+    "Super Chicken",
+    "Name on draft menu mock-up; status to confirm"
+   ]
+  ],
+  "styles": [
+   {
+    "name": "A. Bold street food",
+    "palette": [
+     "#D62828",
+     "#F6BD16",
+     "#1B1B1B",
+     "#FFF4E0"
+    ],
+    "type": "Anton / Inter",
+    "tone": "Short, punchy, cheeky"
+   },
+   {
+    "name": "B. Family friendly",
+    "palette": [
+     "#E4572E",
+     "#FFC857",
+     "#2E8B57",
+     "#FAF3E3"
+    ],
+    "type": "Baloo 2 / Nunito",
+    "tone": "Friendly, generous, inclusive"
+   },
+   {
+    "name": "C. Premium casual",
+    "palette": [
+     "#B23A1E",
+     "#C9A227",
+     "#14213D",
+     "#EDEAE4"
+    ],
+    "type": "DM Serif Display / DM Sans",
+    "tone": "Assured and precise"
+   }
+  ]
+ },
+ "checklist": [
+  {
+   "id": "C1",
+   "text": "Planning/use position confirmed and lease signed",
+   "done": false
+  },
+  {
+   "id": "C2",
+   "text": "Food business registered 28+ days before opening",
+   "done": false
+  },
+  {
+   "id": "C3",
+   "text": "Gas Safe, electrical, fire alarm and emergency lighting signed off",
+   "done": false
+  },
+  {
+   "id": "C4",
+   "text": "Extraction commissioned with gas interlock tested",
+   "done": false
+  },
+  {
+   "id": "C5",
+   "text": "HACCP/SFBB, allergen matrix, pest control in place",
+   "done": false
+  },
+  {
+   "id": "C6",
+   "text": "Stations built and test-cooked to spec",
+   "done": false
+  },
+  {
+   "id": "C7",
+   "text": "POS, kiosk/QR, KDS, printers, delivery apps tested end to end",
+   "done": false
+  },
+  {
+   "id": "C8",
+   "text": "Crew trained and signed off",
+   "done": false
+  },
+  {
+   "id": "C9",
+   "text": "Signage, menu boards, uniforms, packaging match brand book",
+   "done": false
+  },
+  {
+   "id": "C10",
+   "text": "Pre-opening audit 95% or more",
+   "done": false
+  }
+ ],
+ "activity": []
+}
