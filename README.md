@@ -113,6 +113,18 @@ Added once by the first Nishaf or Fanshad sign-in. It only adds items that don't
   - switch to Supabase Auth with personal email logins;
   - split the page into modules with a build step.
 
+## To-do, reminders and calendars
+- **To-do tab:** add a to-do with an optional due date and **reminder time**. Nishaf and Fanshad can assign to-dos to anyone; everyone else adds their own. Owners tick them off; only Nishaf and Fanshad can delete.
+- **Push notifications:**
+  - a teammate's change, including a new to-do assigned to you;
+  - your reminder time;
+  - **the day before** a task or to-do is due (from 08:00 UK time).
+  Reminders come from the server (Supabase `pg_cron` runs the `hq-remind` function every 5 minutes), so they arrive even when the app is closed. Each person turns on 🔔 once per device.
+- **My calendar:** on the To-do tab, **Get my calendar link** gives each person a private subscription feed (`hq-cal`) with their tasks, to-dos (with alerts), stage gates, soft launch and opening. You can add it to iPhone or Mac Calendar (webcal), Google Calendar (Android) or Outlook (copy the link). It updates by itself.
+- **Home tiles:**
+  - **Coming up:** events in the next 14 days, your to-do list and reminders.
+  - **Project progress:** a status donut, time used against work done, and progress by phase.
+
 ## Live sync
 - **Save changes button (top right):** changes save automatically within about a second. The button shows **Save changes (n)** while edits are waiting, **Saving…** while working and **✓ All saved** when everything is stored. Clicking it saves immediately, including a cell you are still typing in. Closing the page with unsaved changes asks you to confirm first.
 - Each item is stored as its own row, so people editing different things never overwrite each other.

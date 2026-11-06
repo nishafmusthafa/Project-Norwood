@@ -90,6 +90,18 @@ a{color:var(--acc);text-underline-offset:2px}a:hover{color:color-mix(in srgb,var
 .tile{cursor:pointer}.tile::after{content:"Tap to see the list ›";display:block;margin-top:.5rem;font-size:.8rem;opacity:.75}.tile:hover{box-shadow:0 2px 4px #0000000f,0 10px 24px #00000018}
 .tline{cursor:pointer;padding:.15rem 0;border-radius:6px}.tline:hover{text-decoration:underline}
 .drill{border:2px solid var(--acc)}.drill h3{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-top:0}
+.sub{margin:1rem 0 .4rem;font-size:.95rem}
+.evl{list-style:none;padding:0;margin:0}.evl li{display:flex;gap:.6rem;align-items:baseline;padding:.4rem 0;border-bottom:1px solid var(--line)}.evl li:last-child{border-bottom:0}
+.dchip{flex:none;font-size:.74rem;font-weight:750;background:var(--chip);color:var(--acc);padding:.15rem .45rem;border-radius:6px;min-width:3.7rem;text-align:center}
+.tchk{display:flex;gap:.6rem;align-items:flex-start;margin:0;cursor:pointer;flex:1;font-weight:400}.tchk input{margin-top:.2rem;flex:none}
+.todo.done b{text-decoration:line-through;opacity:.55}
+.pg{display:flex;gap:1.25rem;align-items:center;flex-wrap:wrap}.donut{width:150px;height:150px;flex:none}.d1{font-size:22px;font-weight:800;fill:var(--fg)}.d2{font-size:9px;fill:var(--mut)}
+.lg .dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:.45rem;vertical-align:-1px}
+.sched{margin:1rem 0 .25rem}.bar2{position:relative;height:14px;background:var(--line);border-radius:7px;margin-top:.35rem;overflow:hidden}.bar2 i{position:absolute;left:0;border-radius:7px}.bar2 .t{top:0;height:100%;background:color-mix(in srgb,var(--mut) 40%,transparent)}.bar2 .w{top:25%;height:50%;background:linear-gradient(90deg,var(--acc),var(--hi))}
+.phrow{display:grid;grid-template-columns:minmax(0,10rem) 1fr auto;gap:.6rem;align-items:center;margin:.3rem 0}.phn{font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.phrow .bar{height:8px;margin:0}
+.ok{color:#2e7d32}
+.todoadd #tdt{width:100%;margin-bottom:.6rem}.todoadd .filters{align-items:flex-end}.todoadd .filters label{display:flex;flex-direction:column;gap:.2rem;flex:1 1 9rem;margin:0}
+.calbtns{display:flex;gap:.5rem;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;justify-content:center;padding:.5rem .9rem;border:1px solid var(--line);border-radius:8px;text-decoration:none;color:var(--fg);background:var(--card);font-weight:650;min-height:42px}.btn.pri{background:var(--acc);color:#fff;border-color:var(--acc)}
 .seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin:.25rem 0 1rem}.seg button{border:0;border-radius:0;background:var(--card);padding:.5rem 1rem;font-weight:600}.seg button[aria-pressed=true]{background:var(--acc);color:#fff}
 .worklist{list-style:none;padding:0;margin:0}.work{display:flex;gap:.75rem;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--line)}.work:last-child{border-bottom:0}.qbtns{display:flex;gap:.35rem;flex-wrap:wrap;justify-content:flex-end}
 details.card summary{cursor:pointer}
@@ -134,7 +146,7 @@ nav .ico,nav [data-menu]{display:none}
  #savebtn,#bell{padding:0 .6rem}
  nav{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:25;display:grid;grid-template-columns:repeat(5,1fr);gap:0;width:auto;overflow:visible;flex-wrap:nowrap;margin:0;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -4px 16px #0000000f;padding:.2rem max(.25rem,env(safe-area-inset-left,0px)) calc(.2rem + env(safe-area-inset-bottom,0px)) max(.25rem,env(safe-area-inset-right,0px))}
  nav button{display:none;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;border:0;background:none;color:var(--mut);font-size:.7rem;font-weight:650;padding:.3rem .1rem;min-height:54px;border-radius:12px;white-space:nowrap}
- nav button[data-v=dashboard],nav button[data-v=mine],nav button[data-v=plan],nav button[data-v=brand],nav button[data-menu]{display:flex}
+ nav button[data-v=dashboard],nav button[data-v=mine],nav button[data-v=plan],nav button[data-v=todo],nav button[data-menu]{display:flex}
  nav .ico{display:block;font-size:1.3rem;line-height:1}
  nav button[aria-current=page],nav button[aria-current=page]:hover{background:color-mix(in srgb,var(--acc) 10%,transparent);color:var(--acc)}
  main{padding:1rem max(.9rem,env(safe-area-inset-right,0px)) calc(5.75rem + env(safe-area-inset-bottom,0px)) max(.9rem,env(safe-area-inset-left,0px))}
@@ -200,7 +212,7 @@ const me=()=>sync.name||"";
  copy, so the app still works offline and pushes queued changes when it reconnects. */
 const SB={url:"https://ufinmrgnqwutxwntcdvs.supabase.co",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmaW5tcmducXd1dHh3bnRjZHZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNTQ3NzQsImV4cCI6MjEwNjgzMDc3NH0.OH5ZXB5eUSDWsDdRcn63Vm0fGSbC-eCg-JgHY_2c4Uo"};
 if(window.NORWOOD_SB)Object.assign(SB,window.NORWOOD_SB);
-const COLLS=["team","tasks","raid","questions","menu","kpis","checklist","activity","brandboard","kb","growth"];
+const COLLS=["team","tasks","raid","questions","menu","kpis","checklist","activity","brandboard","kb","growth","todos"];
 const sync={pin:localStorage.getItem(KEY+".pin")||"",name:localStorage.getItem(KEY+".name")||"",role:localStorage.getItem(KEY+".role")||"",base:null,state:"off",peers:[],pushT:0,pullT:0,pushing:false,again:false,pendingPull:false,chan:null,err:""};
 /* ---------- Access rules (the server enforces the same rules; this only shapes the screen) ----------
  Nishaf, Fanshad: full access.  Everyone else: update status, progress, dates and notes on tasks they own,
@@ -307,7 +319,7 @@ async function init(){
  const raw=localStorage.getItem(KEY);
  if(raw){try{S=JSON.parse(raw)}catch(e){}}
  if(!S){try{const r=await fetch("./data.json",{cache:"no-store"});if(r.ok)S=await r.json()}catch(e){} if(!S)S=clone(SEED)}
- S.activity=S.activity||[];S.brandboard=S.brandboard||[];S.kb=S.kb||[];S.growth=S.growth||[];keyify(S,true);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+ S.activity=S.activity||[];S.brandboard=S.brandboard||[];S.kb=S.kb||[];S.growth=S.growth||[];S.todos=S.todos||[];keyify(S,true);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
  try{sync.base=JSON.parse(localStorage.getItem(KEY+".base")||"null")}catch(e){sync.base=null}
  if(localStorage.getItem(KEY+".theme")==="dark")document.documentElement.dataset.theme="dark";
  $("#theme").onclick=()=>{const d=document.documentElement.dataset.theme==="dark";document.documentElement.dataset.theme=d?"":"dark";localStorage.setItem(KEY+".theme",d?"light":"dark")};
@@ -315,7 +327,7 @@ async function init(){
  render();bindLogin();
  if(signedIn())connect();else{setSync("off");showLogin()}
 }
-const VIEWS={dashboard:"Home",mine:"My work",plan:"Plan",logs:"Risks & decisions",brand:"Brand",menuboard:"Menu",growth:"Franchise",knowledge:"Knowledge",team:"Team",more:"More"};
+const VIEWS={dashboard:"Home",mine:"My work",todo:"To-do",plan:"Plan",logs:"Risks",brand:"Brand",menuboard:"Menu",growth:"Franchise",knowledge:"Knowledge",team:"Team",more:"More"};
 if({tasks:1,gantt:1,calendar:1}[view])view="plan";if({reference:1,data:1}[view])view="more";
 function setHdr(){const h=document.querySelector("header");if(h&&getComputedStyle(h).position==="sticky")document.documentElement.style.setProperty("--hdr",h.offsetHeight+"px");else document.documentElement.style.setProperty("--hdr","0px")}
 window.addEventListener("resize",setHdr);
@@ -623,6 +635,7 @@ function alerts(){const t0=today(),out=[],days=Math.ceil((D(S.project.opening)-t
  S.questions.filter(q=>q.status==="Open"&&q.needed&&D(q.needed)<t0).forEach(q=>out.push([2,`Decision overdue: ${esc(q.question)} (needed ${fmt(q.needed)}) · ${esc(q.owner)}`]));
  const reg=task("T19");if(reg&&reg.status!=="Done"&&days<45)out.push([3,`Food business registration (T19) must be done 28+ days before opening – ${days} days to go`,"T19"]);
  S.raid.filter(r=>r.type==="Risk"&&r.impact==="High"&&!["Closed","Mitigated"].includes(r.status)).forEach(r=>out.push([1,`High risk open: ${esc(r.item)} · ${esc(r.owner)}`]));
+ (S.todos||[]).filter(x=>!x.done&&x.due&&D(x.due)<today()&&(isAdmin()||x.owner===me())).forEach(x=>out.push([2,`To-do overdue: ${esc(x.text)} (due ${fmt(x.due)}) · ${esc(x.owner)}`]));
  return out.sort((a,b)=>b[0]-a[0])}
 const STOP=new Set("the and for with this that from have has are was were will your our you they their them what when where which while into about over more most than then just also very really here there some such only make made like good great best new news uk how why its it's can not but all any one two get got via per out off top day week year time post reel video watch".split(" "));
 const words=s=>(String(s||"").toLowerCase().match(/[a-z][a-z'-]{3,}/g)||[]).filter(w=>!STOP.has(w));
@@ -645,13 +658,13 @@ function insights(){const out=[],t0=today(),since=new Date(t0);since.setDate(sin
  return out}
 R.dashboard=()=>{const al=alerts(),ins=insights(),lvl=["","🟡","🟠","🔴"],latest=[...(S.kb||[])].sort(byNew).slice(0,4);
  const d0=R.dash0(),cut=d0.indexOf('<div class="grid">\n <div class="card"><h3>Overdue');
- return notifBanner()+d0.slice(0,cut)+strip("all",S.tasks)+`<div class="grid">
+ return notifBanner()+d0.slice(0,cut)+strip("all",S.tasks)+homeTiles()+`<div class="grid">
  <div class="card"><h3>Alerts (${al.length})</h3>${al.length?"<ul>"+al.slice(0,12).map(([l,m,id])=>`<li class="small">${lvl[l]} ${id?`<a href="#" data-edit="${id}">${m}</a>`:m}</li>`).join("")+"</ul>"+(al.length>12?`<p class="small mut">+${al.length-12} more</p>`:""):'<p class="mut">Nothing needs attention right now.</p>'}</div>
  <div class="card"><h3>Insights</h3><ul>${ins.map(x=>`<li class="small">${x}</li>`).join("")}</ul><p class="small mut">Worked out automatically from the plan, the knowledge base, the brand board and industry news (simple rules, not an AI model).</p></div>
  </div><div class="grid">
  <div class="card"><h3>Latest in the knowledge base</h3>${latest.length?"<ul>"+latest.map(x=>`<li class="small">${safeUrl(x.url)?`<a href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener noreferrer">${esc(x.title)}</a>`:esc(x.title)} <span class="mut">· ${esc(x.kind)} · ${esc(x.who)}</span></li>`).join("")+"</ul>":'<p class="mut small">Nothing yet.</p>'}<button data-go="knowledge">Open knowledge base</button></div>
  <div class="card"><h3>Industry news</h3>${newsList(6)}<button data-go="knowledge">More news</button></div></div>`+d0.slice(cut)};
-A.dashboard=()=>{bindNotif();bindDrill();bindEdit();bindNews();document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{view=b.dataset.go;render()});loadNews()};
+A.dashboard=()=>{bindNotif();bindDrill();bindEdit();bindTodoChecks();bindNews();document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{view=b.dataset.go;render()});loadNews()};
 /* Expert launch content (PM gates & tasks, brand strategy, franchise readiness): added once by the first admin, never overwrites */
 function seedExpert(){const done=S.seeded||[];if(done.includes("expert-v1"))return;let x;try{x=JSON.parse($("#seed2").textContent)}catch(e){return}
  let n=0;const now=new Date().toISOString();for(const [c,items] of Object.entries(x)){S[c]=S[c]||[];items.forEach(it=>{if(!S[c].some(y=>y._k===c+":"+it.id||(y.id&&y.id===it.id))){S[c].push(Object.assign({_k:c+":"+it.id,at:now},clone(it)));n++}})}
@@ -672,8 +685,8 @@ function bindDrill(){document.querySelectorAll("[data-drill]").forEach(el=>{cons
  el.onclick=e=>{if(e.target.closest("a,button")&&e.target.closest("[data-drill]")!==el)return;go()};
  if(el.tagName!=="BUTTON"){el.tabIndex=0;el.setAttribute("role","button");el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}}}})}
 /* ---------- Phone layout: bottom tab bar, "More" sheet, card lists ---------- */
-const PRIMARY=["dashboard","mine","plan","brand"];
-const ICON={dashboard:"⌂︎",mine:"✓︎",plan:"▤︎",logs:"⚑︎",brand:"◆︎",menuboard:"☷︎",growth:"↗︎",knowledge:"✦︎",team:"☺︎",more:"⋯"};
+const PRIMARY=["dashboard","mine","todo","plan"];
+const ICON={dashboard:"⌂︎",mine:"✓︎",todo:"☑︎",plan:"▤︎",logs:"⚑︎",brand:"◆︎",menuboard:"☷︎",growth:"↗︎",knowledge:"✦︎",team:"☺︎",more:"⋯"};
 const isPhone=()=>window.matchMedia&&matchMedia("(max-width:760px)").matches;
 function openSheet(){const d=$("#sheet");$("#sheetc").innerHTML=`<div class="sheet-grab" aria-hidden="true"></div>
  <div class="sheet-who">${signedIn()?`<b>${esc(me())}</b> <span class="chip ${isAdmin()?"st-Done":""}">${isAdmin()?"Full access":"Team member"}</span>`:'<span class="mut">View only</span>'}</div>
@@ -691,6 +704,60 @@ function phoneTasks(){const f=ui.f,ts=filtered();
 function bindPhoneTasks(){const f=ui.f;$("#pq").oninput=e=>{f.q=e.target.value;const p=e.target.selectionStart;render();const i=$("#pq");i.focus();try{i.setSelectionRange(p,p)}catch(x){}};
  $("#ps").onchange=e=>{f.status=e.target.value;render()};$("#po").onchange=e=>{f.owner=e.target.value;render()};if($("#padd"))$("#padd").onclick=()=>editTask(null);
  bindEdit();document.querySelectorAll("[data-qs]").forEach(b=>b.onclick=()=>setField(b.dataset.qs,"status",b.dataset.v))}
+/* ---------- To-do list, reminders and personal calendar feed ---------- */
+const fmtWhen=r=>r?new Date(r).toLocaleString("en-GB",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"";
+const toLocalInput=r=>{if(!r)return"";const d=new Date(r);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)};
+function bindTodoChecks(){document.querySelectorAll("[data-td]").forEach(c=>c.onchange=()=>{const x=(S.todos||[]).find(y=>y._k===c.dataset.td);if(!x)return;x.done=c.checked;x.doneAt=c.checked?new Date().toISOString():"";log((c.checked?"To-do done: ":"To-do reopened: ")+x.text);render()})}
+function todoRow(x){const m=me(),can=isAdmin()||x.owner===m,od=!x.done&&x.due&&D(x.due)<today();
+ return `<li class="work todo${x.done?" done":""}"><label class="tchk"><input type="checkbox" data-td="${esc(x._k)}"${x.done?" checked":""}${can?"":" disabled"} aria-label="Mark “${esc(x.text)}” done"><span><b>${esc(x.text)}</b><div class="small mut">${x.owner!==m?"<b>"+esc(x.owner)+"</b> · ":""}${x.due?(od?`<span class="bad">overdue · due ${fmt(x.due)}</span>`:"due "+fmt(x.due)):"no due date"}${x.remind?` · ⏰ ${fmtWhen(x.remind)}`:""}${x.by&&x.by!==x.owner?" · from "+esc(x.by):""}${x.notes?" · "+esc(x.notes):""}</div></span></label><div class="qbtns">${can?`<button class="small" data-tde="${esc(x._k)}">Edit</button>`:""}${isAdmin()?`<button class="small del" data-tdx="${esc(x._k)}">Delete</button>`:""}</div></li>`}
+R.todo=()=>{if(!signedIn())return `<h2>To-do</h2><div class="card"><p>Sign in to see and add to-dos.</p><button class="pri" id="tsi">Sign in</button></div>`;
+ const td=S.todos||[],m=me(),sortT=a=>[...a].sort((x,y)=>(x.done-y.done)||String(x.due||"9").localeCompare(String(y.due||"9")));
+ const mine=td.filter(x=>x.owner===m),team=td.filter(x=>x.owner!==m),open=mine.filter(x=>!x.done).length;
+ const list=(a,e)=>a.length?`<ul class="worklist">${sortT(a).map(todoRow).join("")}</ul>`:`<p class="mut small">${e}</p>`;
+ return `<h2>To-do</h2><p class="small mut">Quick jobs and reminders. Set a reminder time and your phone gets a notification then – even with the app closed (turn on 🔔 first). You're also reminded the day before anything is due.</p>
+ <form class="card todoadd" id="tdf" autocomplete="off"><input id="tdt" required placeholder="What needs doing?" aria-label="New to-do" enterkeyhint="done">
+ <div class="filters">${isAdmin()?`<label class="small">For<select id="tdo">${teamNames().map(n=>`<option${n===m?" selected":""}>${esc(n)}</option>`).join("")}</select></label>`:""}<label class="small">Due date<input type="date" id="tdd"></label><label class="small">Remind me at<input type="datetime-local" id="tdr"></label><button class="pri">+ Add</button></div></form>
+ <div class="card"><h3>My to-dos <span class="small mut">${open} open</span></h3>${list(mine,"Nothing on your list.")}</div>
+ <div class="card"><h3>Team to-dos</h3>${list(team,"Nothing for the rest of the team.")}</div>${calCard()}`};
+A.todo=()=>{if($("#tsi"))$("#tsi").onclick=()=>showLogin();const f=$("#tdf");if(!f)return;
+ f.onsubmit=e=>{e.preventDefault();const text=$("#tdt").value.trim();if(!text)return;const owner=$("#tdo")?$("#tdo").value:me(),due=$("#tdd").value,r=$("#tdr").value;
+  S.todos=S.todos||[];S.todos.push({id:"D"+Date.now().toString(36),text,owner,by:me(),due,remind:r?new Date(r).toISOString():"",done:false,notes:"",at:new Date().toISOString()});
+  log(owner===me()?`To-do added: ${text}${due?" (due "+fmt(due)+")":""}`:`New to-do for ${owner}: ${text}${due?" (due "+fmt(due)+")":""}`);render();
+  toast(r&&notifState()!=="on"?"Added. Turn on 🔔 notifications so the reminder reaches your phone.":"Added.")};
+ bindTodoChecks();
+ document.querySelectorAll("[data-tde]").forEach(b=>b.onclick=()=>todoEdit((S.todos||[]).find(y=>y._k===b.dataset.tde)));
+ document.querySelectorAll("[data-tdx]").forEach(b=>b.onclick=()=>{const x=(S.todos||[]).find(y=>y._k===b.dataset.tdx);if(x&&confirm("Delete “"+x.text+"”?")){S.todos=S.todos.filter(y=>y!==x);log("Deleted to-do: "+x.text);render()}});
+ bindCal()};
+function todoEdit(x){if(!x)return;const f=$("#dlgf"),ad=isAdmin();
+ f.innerHTML=`<h3>Edit to-do</h3><label>To-do<input name="text" value="${esc(x.text)}" required></label>${ad?`<label>For<select name="owner">${teamNames().map(n=>`<option${n===x.owner?" selected":""}>${esc(n)}</option>`).join("")}</select></label>`:""}<label>Due date<input type="date" name="due" value="${esc(x.due||"")}"></label><label>Remind me at<input type="datetime-local" name="remind" value="${toLocalInput(x.remind)}"></label><label>Notes<textarea name="notes" rows="3">${esc(x.notes||"")}</textarea></label><p style="display:flex;gap:.5rem;justify-content:flex-end"><button value="cancel" formnovalidate>Cancel</button><button class="pri" value="ok">Save</button></p>`;
+ const d=$("#dlg");d.returnValue="";d.showModal();d.onclose=()=>{if(d.returnValue!=="ok")return;const fd=new FormData(f);x.text=String(fd.get("text")||"").trim()||x.text;if(ad&&fd.get("owner"))x.owner=fd.get("owner");x.due=fd.get("due")||"";const r=fd.get("remind");x.remind=r?new Date(r).toISOString():"";x.notes=String(fd.get("notes")||"");log("To-do updated: "+x.text);render()}}
+function calCard(){const l=ui.calLink;return `<div class="card"><h3>📅 My calendar</h3><p class="small">Put your tasks, to-dos and reminders into your phone's own calendar, with alerts. It keeps itself up to date as the plan changes.</p>${l?`<div class="calbtns"><a class="btn pri" href="${esc(l.replace(/^https?:/,"webcal:"))}">iPhone / Mac Calendar</a><a class="btn" target="_blank" rel="noopener" href="https://calendar.google.com/calendar/r?cid=${encodeURIComponent(l.replace(/^https?:/,"webcal:"))}">Google Calendar (Android)</a><button id="calcopy">Copy link for Outlook</button></div><p class="small mut">This link is private to you – please don't share it. iPhone checks for changes roughly every 30–60 minutes; Google can take a few hours.</p>`:`<button class="pri" id="calget">Get my calendar link</button>`}</div>`}
+function bindCal(){if($("#calget"))$("#calget").onclick=async()=>{try{const j=await call("hq_cal_link");ui.calLink=SB.url+"/functions/v1/hq-cal?u="+j.token;render()}catch(e){toast("Couldn't get your calendar link: "+e.message)}};
+ if($("#calcopy"))$("#calcopy").onclick=async()=>{try{await navigator.clipboard.writeText(ui.calLink);toast("Calendar link copied – paste it into Outlook › Add calendar › Subscribe from web.")}catch(e){prompt("Copy this link:",ui.calLink)}}}
+/* ---------- Home tiles: Coming up + Project progress graphic ---------- */
+function homeTiles(){const t0=today(),m=me(),in14=new Date(t0);in14.setDate(in14.getDate()+14);const ev=[];
+ S.tasks.forEach(t=>{if(t.status==="Done")return;if(t.due&&D(t.due)>=t0&&D(t.due)<=in14)ev.push([t.due,t.id+" due",t.name,t.id,t.owner]);if(t.start&&t.status==="Not started"&&D(t.start)>=t0&&D(t.start)<=in14)ev.push([t.start,t.id+" starts",t.name,t.id,t.owner])});
+ [["softLaunch","Soft launch"],["opening","Grand opening"]].forEach(([k,l])=>{const d=S.project[k];if(d&&D(d)>=t0)ev.push([d,l,"","",""])});
+ ev.sort((a,b)=>a[0].localeCompare(b[0]));
+ const myT=(S.todos||[]).filter(x=>x.owner===m&&!x.done).sort((a,b)=>String(a.due||"9").localeCompare(String(b.due||"9")));
+ const rem=(S.todos||[]).filter(x=>x.owner===m&&!x.done&&x.remind&&new Date(x.remind)>new Date()).sort((a,b)=>a.remind.localeCompare(b.remind));
+ const dchip=d=>`<span class="dchip">${D(d).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>`;
+ const coming=`<div class="card"><h3>Coming up</h3>
+ <h4 class="sub">📅 Upcoming events <span class="mut small">next 14 days</span></h4>${ev.length?`<ul class="evl">${ev.slice(0,6).map(e=>`<li>${dchip(e[0])}<span>${e[3]?`<a href="#" data-edit="${e[3]}"><b>${esc(e[1])}</b></a>`:`<b>${esc(e[1])}</b>`} ${esc(e[2])}${e[4]?` <span class="mut small">· ${esc(e[4])}</span>`:""}</span></li>`).join("")}</ul>${ev.length>6?`<p class="small mut">+${ev.length-6} more – see Plan › Calendar</p>`:""}`:'<p class="mut small">Nothing in the next 14 days.</p>'}
+ <h4 class="sub">☑ My to-do list</h4>${!signedIn()?'<p class="mut small">Sign in to see your to-dos.</p>':myT.length?`<ul class="evl">${myT.slice(0,5).map(x=>`<li><label class="tchk"><input type="checkbox" data-td="${esc(x._k)}" aria-label="Mark “${esc(x.text)}” done"><span>${esc(x.text)}${x.due?` <span class="small ${D(x.due)<t0?"bad":"mut"}">· ${D(x.due)<t0?"overdue, was due":"due"} ${fmt(x.due)}</span>`:""}</span></label></li>`).join("")}</ul>${myT.length>5?`<p class="small mut">+${myT.length-5} more</p>`:""}`:'<p class="mut small">Nothing on your list.</p>'}
+ <h4 class="sub">⏰ Reminders</h4>${rem.length?`<ul class="evl">${rem.slice(0,4).map(x=>`<li><span class="dchip">${new Date(x.remind).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</span><span>${esc(x.text)}</span></li>`).join("")}</ul>`:'<p class="mut small">No reminders set.</p>'}
+ <button data-go="todo">Open To-do</button></div>`;
+ const by=STATUSES.map(s=>[s,S.tasks.filter(t=>t.status===s).length]),N=S.tasks.length||1,C=2*Math.PI*42;let off=0;
+ const col={"Done":"#2e7d32","In progress":"var(--hi)","Blocked":"#8e1b1b","Not started":"color-mix(in srgb,var(--mut) 28%,transparent)"};
+ const segs=by.map(([st,n])=>{const len=n/N*C,el=n?`<circle r="42" cx="60" cy="60" fill="none" stroke="${col[st]}" stroke-width="16" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}"/>`:"";off+=len;return el}).join("");
+ const starts=S.tasks.map(t=>+D(t.start)).filter(x=>!isNaN(x)),st0=starts.length?new Date(Math.min(...starts)):t0,op=D(S.project.opening),pc=pct();
+ const used=op>st0?Math.max(0,Math.min(100,Math.round((t0-st0)/(op-st0)*100))):0,verdict=pc+10<used?["bad","Behind schedule"]:pc<used?["warn","Slightly behind"]:["ok","On track"];
+ const ph=phases().map(p=>{const ts=S.tasks.filter(t=>t.phase===p),d=ts.filter(t=>t.status==="Done").length,avg=ts.reduce((a,t)=>a+(t.status==="Done"?100:+t.progress||0),0)/(ts.length||1);return [p,d,ts.length,avg]});
+ const prog=`<div class="card"><h3>Project progress</h3><div class="pg"><svg viewBox="0 0 120 120" class="donut" role="img" aria-label="${pc}% complete"><circle r="42" cx="60" cy="60" fill="none" stroke="var(--line)" stroke-width="16"/><g transform="rotate(-90 60 60)">${segs}</g><text x="60" y="60" text-anchor="middle" class="d1">${pc}%</text><text x="60" y="76" text-anchor="middle" class="d2">complete</text></svg>
+ <div class="lg">${by.map(([st,n])=>`<div class="tline" data-drill="all:${SKEY[st]}"><span class="dot" style="background:${col[st]}"></span>${st} <b>${n}</b></div>`).join("")}</div></div>
+ <div class="sched small"><div>Time used <b>${used}%</b> · Work done <b>${pc}%</b> – <b class="${verdict[0]}">${verdict[1]}</b></div><div class="bar2" aria-hidden="true"><i class="t" style="width:${used}%"></i><i class="w" style="width:${pc}%"></i></div><div class="mut" style="font-size:.75rem;margin-top:.2rem">Grey = time gone to opening day · colour = work done</div></div>
+ <h4 class="sub">By phase</h4>${ph.map(([p,d,n,a])=>`<div class="phrow" title="${esc(p)}: ${d} of ${n} done"><span class="phn">${esc(p)}</span><span class="bar"><i style="width:${Math.round(a)}%"></i></span><span class="small mut">${d}/${n}</span></div>`).join("")}</div>`;
+ return `<div class="grid">${coming}${prog}</div>`}
 /* ---------- Simple navigation: Plan and More group the detailed views ---------- */
 function seg(key,opts,cur){return `<div class="seg" role="group" aria-label="View">${opts.map(([k,l])=>`<button data-seg="${key}" data-val="${k}" aria-pressed="${k===cur}">${l}</button>`).join("")}</div>`}
 function bindSeg(){document.querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{ui[b.dataset.seg]=b.dataset.val;if(b.dataset.seg==="plan")ui.mode=b.dataset.val==="board"?"kanban":"table";render()})}
