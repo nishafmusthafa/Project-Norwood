@@ -56,6 +56,29 @@ a{color:var(--acc);text-underline-offset:2px}a:hover{color:color-mix(in srgb,var
 .sw{border-radius:8px;width:32px;height:32px;box-shadow:inset 0 0 0 1px #0000001a}
 @media (prefers-reduced-motion:reduce){.card{transition:none}}
 .bimg{display:block;width:100%;max-height:340px;object-fit:cover;object-position:top;border-radius:10px;margin:.4rem 0;border:1px solid var(--line)}
+/* scrolling menu board (colours from the chosen palette) */
+.mb{--m-acc:#D62828;--m-hi:#F6BD16;--m-ink:#1B1B1B;--m-paper:#FFF4E0;background:var(--m-paper);color:var(--m-ink);border-radius:18px;overflow:clip;border:1px solid #0000001a;margin-bottom:1rem;box-shadow:0 6px 24px #00000014}
+.mb-hero{position:relative;background:radial-gradient(circle at 88% 18%,var(--m-hi) 0 15%,transparent 15.5%),radial-gradient(circle at 96% 70%,color-mix(in srgb,var(--m-hi) 55%,transparent) 0 7%,transparent 7.5%),linear-gradient(135deg,var(--m-acc),color-mix(in srgb,var(--m-acc) 68%,#000));color:#fff;padding:2.4rem 1.5rem 2rem}
+.mb-kicker{text-transform:uppercase;letter-spacing:.14em;font-size:.72rem;font-weight:700;opacity:.85}
+.mb-title{font-size:clamp(2.2rem,7vw,3.8rem);font-weight:900;margin:.25rem 0 0;letter-spacing:-.03em;line-height:.95;text-transform:uppercase}
+.mb-tag{display:inline-block;margin-top:.8rem;border:1.5px solid #ffffffb0;border-radius:999px;padding:.25rem .85rem;font-size:.82rem;font-weight:800;letter-spacing:.03em}
+.mb-cats{position:sticky;top:var(--hdr,0px);z-index:6;display:flex;gap:.45rem;overflow-x:auto;scrollbar-width:none;padding:.65rem 1rem;background:color-mix(in srgb,var(--m-paper) 90%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid #00000014}
+.mb-cats::-webkit-scrollbar{display:none}
+.mb-cats a{white-space:nowrap;text-decoration:none;color:var(--m-ink);font-weight:800;font-size:.85rem;padding:.4rem .9rem;border-radius:999px;border:1.5px solid color-mix(in srgb,var(--m-acc) 40%,transparent);transition:background .15s,color .15s}
+.mb-cats a.on,.mb-cats a:hover{background:var(--m-acc);color:#fff;border-color:var(--m-acc)}
+.mb-sec{padding:1.4rem 1.25rem .6rem;scroll-margin-top:calc(var(--hdr,0px) + 4rem)}
+.mb-sec:nth-of-type(even){background:color-mix(in srgb,var(--m-hi) 13%,var(--m-paper))}
+.mb-sec h3{display:inline-block;background:var(--m-acc);color:#fff;text-transform:uppercase;letter-spacing:.05em;font-weight:900;font-size:1.05rem;padding:.3rem .8rem;border-radius:6px;margin:0 0 .9rem;transform:rotate(-1.2deg);box-shadow:3px 3px 0 var(--m-hi)}
+.mb-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.1rem 2.2rem}
+.mb-item{display:flex;align-items:baseline;gap:.45rem;padding:.55rem 0}
+.mb-name{font-weight:750}
+.mb-dots{flex:1;min-width:1rem;border-bottom:2px dotted color-mix(in srgb,var(--m-ink) 28%,transparent);transform:translateY(-.3em)}
+.mb-price{font-weight:900;color:var(--m-acc);white-space:nowrap;font-size:1.05rem}
+.mb-price[contenteditable=true]{cursor:text;border-bottom:1px dashed color-mix(in srgb,var(--m-acc) 50%,transparent)}
+.mb-foot{padding:1rem 1.25rem 1.3rem;font-size:.8rem;opacity:.75;display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+.mb-foot .sw{width:16px;height:16px}
+.mb-top{position:sticky;bottom:1rem;float:right;margin:-3.2rem 1rem 0 0;z-index:6;background:var(--m-acc);color:#fff;border:0;border-radius:999px;padding:.5rem .9rem;font-weight:800;box-shadow:0 4px 12px #00000030}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
 .seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin:.25rem 0 1rem}.seg button{border:0;border-radius:0;background:var(--card);padding:.5rem 1rem;font-weight:600}.seg button[aria-pressed=true]{background:var(--acc);color:#fff}
 .worklist{list-style:none;padding:0;margin:0}.work{display:flex;gap:.75rem;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--line)}.work:last-child{border-bottom:0}.qbtns{display:flex;gap:.35rem;flex-wrap:wrap;justify-content:flex-end}
 details.card summary{cursor:pointer}
@@ -221,10 +244,12 @@ async function init(){
  render();bindLogin();
  if(signedIn())connect();else{setSync("off");showLogin()}
 }
-const VIEWS={dashboard:"Home",mine:"My work",plan:"Plan",logs:"Risks & decisions",brand:"Brand",growth:"Franchise growth",knowledge:"Knowledge",team:"Team",more:"More"};
+const VIEWS={dashboard:"Home",mine:"My work",plan:"Plan",logs:"Risks & decisions",brand:"Brand",menuboard:"Menu",growth:"Franchise growth",knowledge:"Knowledge",team:"Team",more:"More"};
 if({tasks:1,gantt:1,calendar:1}[view])view="plan";if({reference:1,data:1}[view])view="more";
+function setHdr(){const h=document.querySelector("header");if(h&&getComputedStyle(h).position==="sticky")document.documentElement.style.setProperty("--hdr",h.offsetHeight+"px");else document.documentElement.style.setProperty("--hdr","0px")}
+window.addEventListener("resize",setHdr);
 function render(){
- applyTheme();
+ applyTheme();setTimeout(setHdr,0);
  $("#nav").innerHTML=Object.entries(VIEWS).map(([k,v])=>`<button data-v="${k}"${k===view?' aria-current="page"':""}>${v}</button>`).join("");
  $("#nav").querySelectorAll("button").forEach(b=>b.onclick=()=>{view=b.dataset.v;localStorage.setItem(KEY+".view",view);render();$("#app").focus()});
  $("#app").innerHTML=(R[view]||R.dashboard)();(A[view]||(()=>{}))();
@@ -419,6 +444,31 @@ function applyTheme(){const t=(S&&S.theme&&hexes((S.theme.colours||[]).join(" ")
  const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=acc}
 function setAppColours(name,colours){if(!isAdmin()){toast(ADMIN_NOTE);return}const c=hexes(colours.join(" "));if(c.length<2){toast("Needs at least two colours.");return}
  S.theme={name,colours:c};log("App colours set to "+name);render();toast("App colours changed to “"+name+"” for everyone.")}
+/* ---------- Menu board: scroll-down digital menu in the brand palette ---------- */
+const slug=x=>String(x).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+function menuPalettes(){const cur=S.theme||DEF_THEME,out=[{name:cur.name+" (app colours)",colours:cur.colours}];
+ ((S.brand||{}).styles||[]).forEach(x=>out.push({name:x.name,colours:x.palette}));
+ (S.brandboard||[]).filter(x=>hexes((x.colours||[]).join(" ")).length>=3).forEach(x=>out.push({name:x.title,colours:x.colours}));
+ return out.filter(x=>hexes((x.colours||[]).join(" ")).length>=2)}
+function boardVars(cols){const c=hexes(cols.join(" ")),byL=[...c].sort((a,b)=>lum(a)-lum(b));
+ const acc=c.filter(x=>lum(x)>.03&&lum(x)<.22).sort((a,b)=>lum(b)-lum(a))[0]||c[0],ink=lum(byL[0])<.06?byL[0]:"#1B1B1B",paper=lum(byL[byL.length-1])>.75?byL[byL.length-1]:"#FFFFFF";
+ const hi=c.find(x=>x!==acc&&x!==ink&&x!==paper)||acc;return {acc,hi,ink,paper,css:`--m-acc:${acc};--m-hi:${hi};--m-ink:${ink};--m-paper:${paper}`}}
+R.menuboard=()=>{const pals=menuPalettes(),pi=Math.min(ui.mpal||0,pals.length-1),pal=pals[pi],v=boardVars(pal.colours),cats=[...new Set(S.menu.map(m=>m.category))];
+ return `<h2>Menu</h2><p class="small mut">The draft menu as customers would see it on a phone or screen. Scroll down, or jump to a section with the buttons.</p>
+ <div class="card small" style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center"><b>Palette:</b> ${pals.map((q,i)=>`<button class="small" data-mpal="${i}" aria-pressed="${i===pi}" style="${i===pi?"outline:2px solid var(--acc)":""}">${hexes(q.colours.join(" ")).slice(0,4).map(x=>`<span class="sw" style="background:${x};width:14px;height:14px;display:inline-block;vertical-align:middle;border-radius:4px"></span>`).join("")} ${esc(q.name)}</button>`).join("")}</div>
+ <div class="mb" style="${v.css}" id="mb">
+  <div class="mb-hero"><div class="mb-kicker">${esc(S.project.name)}</div><div class="mb-title">The Menu</div><div class="mb-tag">Fried fresh · Flame-grilled · Halal</div></div>
+  <nav class="mb-cats" aria-label="Menu sections">${cats.map(k=>`<a href="#mb-${slug(k)}" data-mbc="${slug(k)}">${esc(k)}</a>`).join("")}</nav>
+  ${cats.map(k=>`<section class="mb-sec" id="mb-${slug(k)}" aria-label="${esc(k)}"><h3>${esc(k)}</h3><div class="mb-items">${S.menu.map((m,i)=>[m,i]).filter(([m])=>m.category===k).map(([m,i])=>`<div class="mb-item"><span class="mb-name">${esc(m.item)}</span><span class="mb-dots" aria-hidden="true"></span><span class="mb-price"${canMenu()?` contenteditable="true" data-mbp="${i}" aria-label="Price for ${esc(m.item)}"`:""}>${esc(m.price)}</span></div>`).join("")}</div></section>`).join("")}
+  <div class="mb-foot">${[v.acc,v.hi,v.ink,v.paper].map(x=>`<span class="sw" title="${x}" style="background:${x}"></span>`).join("")} ${esc(pal.name)} · Draft prices, not validated.${canMenu()?" Tap a price to change it.":""}</div>
+  <button class="mb-top" id="mbtop" aria-label="Back to top of menu">↑ Top</button>
+ </div>
+ <p class="small mut">Changing the palette here only previews this menu. To restyle the whole app, use <b>Use as app colours</b> on the Brand tab.</p>`};
+A.menuboard=()=>{document.querySelectorAll("[data-mpal]").forEach(b=>b.onclick=()=>{ui.mpal=+b.dataset.mpal;render()});
+ document.querySelectorAll("[data-mbc]").forEach(a=>a.onclick=e=>{e.preventDefault();const t=document.getElementById("mb-"+a.dataset.mbc);if(t)t.scrollIntoView({block:"start"})});
+ const top=$("#mbtop");if(top)top.onclick=()=>$("#mb").scrollIntoView({block:"start"});
+ document.querySelectorAll("[data-mbp]").forEach(el=>{el.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();el.blur()}};el.onblur=()=>{const m=S.menu[+el.dataset.mbp],v=el.textContent.trim();if(m&&v&&v!==m.price){const o=m.price;m.price=v;log(`Menu price ${m.item}: ${o} → ${v}`);render()}else if(m)el.textContent=m.price}});
+ if("IntersectionObserver" in window){const links=[...document.querySelectorAll("[data-mbc]")],io=new IntersectionObserver(es=>{es.forEach(en=>{if(en.isIntersecting){links.forEach(l=>l.classList.toggle("on",l.dataset.mbc===en.target.id.slice(3)));const on=links.find(l=>l.classList.contains("on"));if(on)on.scrollIntoView({block:"nearest",inline:"center"})}})},{rootMargin:"-30% 0px -60% 0px"});document.querySelectorAll(".mb-sec").forEach(x=>io.observe(x))}};
 /* ---------- Brand board & Knowledge base ---------- */
 const canItem=it=>isAdmin()||(signedIn()&&!!it&&it.who===me());
 const BRAND_KINDS=["Idea","Colour palette","Typography","Logo / visual","Packaging","Reference","Competitor","Campaign"];
@@ -522,7 +572,7 @@ const PLAN=[["list","List"],["board","Board"],["timeline","Timeline"],["calendar
 R.plan=()=>{const p=ui.plan||"list",inner=p==="timeline"?R.gantt():p==="calendar"?R.calendar():(ui.mode=p==="board"?"kanban":"table",R.tasks());
  return `<h2>Plan</h2><p class="small mut">Every task to opening day. Switch between a list, a board you can drag cards on, a timeline and a calendar.</p>${seg("plan",PLAN,p)}`+inner.replace(/^<h2>(Tasks|Gantt)<\/h2>/,"")};
 A.plan=()=>{bindSeg();const p=ui.plan||"list";(p==="timeline"?A.gantt:p==="calendar"?A.calendar:A.tasks)()};
-R.more=()=>{const p=ui.more||"reference";return `<h2>More</h2>${seg("more",[["reference","Menu, KPIs & area"],["data","Backup & sharing"]],p)}`+(p==="data"?R.data():R.reference()).replace(/^<h2>(Reference|Data)<\/h2>/,"")};
+R.more=()=>{const p=ui.more||"reference";return `<h2>More</h2>${seg("more",[["reference","Menu table, KPIs & area"],["data","Backup & sharing"]],p)}`+(p==="data"?R.data():R.reference()).replace(/^<h2>(Reference|Data)<\/h2>/,"")};
 A.more=()=>{bindSeg();((ui.more||"reference")==="data"?A.data:A.reference)()};
 /* ---------- My work: one simple page per person ---------- */
 function quick(t){if(!canTask(t))return "";const b=(s,l,c)=>t.status===s?"":`<button class="small ${c||""}" data-qs="${t.id}" data-v="${s}">${l}</button>`;
@@ -574,8 +624,7 @@ R.data=()=>`<h2>Data</h2>
  <div class="grid" style="margin-top:1rem">
  <div class="card"><h3>Sharing</h3><p class="small">Signed in as <b>${esc(me()||"—")}</b> · ${isAdmin()?"Full access":signedIn()?"Team member":"View only"}<br>Status: <b>${esc($("#sync").textContent.replace("● ",""))}</b>${sync.peers.length?"<br>Online now: "+esc(sync.peers.join(", ")):""}</p>${signedIn()?'<p><button data-notif>'+(notifState()==="on"?"🔔 Notifications on – turn off":"🔕 Turn on notifications")+'</button></p><p><button id="so">Sign out of this browser</button></p>':'<p><button id="si" class="pri">Sign in</button></p>'}${localStorage.getItem(KEY+".presync")?'<p class="small">This browser had its own copy from before it joined. <button id="xb">Download that old copy</button></p>':""}</div>
  <div class="card"><h3>Export</h3><p><button id="xj" class="pri">Export JSON (full backup)</button></p><p><button id="xc">Export tasks CSV</button></p><p><button id="xi">Export deadlines (.ics)</button></p></div>
- ${isAdmin()?`<div class="card"><h3>Import</h3><p class="small">Replace all data with a previously exported JSON file.${signedIn()?" <b>This replaces it for everyone.</b>":""}</p><input type="file" id="ij" accept=".json,application/json" aria-label="Import JSON"></div>
- <div class="card"><h3>Reset</h3><p class="small">Restore the seed data (38 tasks). ${signedIn()?"<b>This wipes everyone's changes</b> – export first.":"Your changes in this browser will be lost – export first."}</p><button id="rs" class="del">Reset to defaults</button></div>`:""}
+ ${isAdmin()?`<div class="card"><h3>Import</h3><p class="small">Replace all data with a previously exported JSON file.${signedIn()?" <b>This replaces it for everyone.</b>":""}</p><input type="file" id="ij" accept=".json,application/json" aria-label="Import JSON"></div>`:""}
  </div><p class="small mut">Last saved: ${new Date().toLocaleString("en-GB")} · ${S.tasks.length} tasks · ${S.activity.length} activity entries.</p>`;
 function dl(name,text,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
 function csv(){const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"',h=["id","phase","name","owner","start","due","status","progress","critical","deps","notes"];
@@ -586,7 +635,7 @@ function ics(){const e=s=>String(s).replace(/[\\;,]/g,m=>"\\"+m).replace(/\n/g,"
 A.data=()=>{$("#xj").onclick=()=>dl("norwood-hq-"+iso(new Date())+".json",JSON.stringify(S,null,1),"application/json");$("#xc").onclick=()=>dl("norwood-tasks.csv",csv(),"text/csv");$("#xi").onclick=()=>dl("norwood-deadlines.ics",ics(),"text/calendar");
  const who=signedIn()?"for everyone":"in this browser";
  if($("#ij"))$("#ij").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.tasks))throw 0;if(confirm("Replace all data "+who+" with "+f.name+"?")){S=d;S.activity=S.activity||[];S.brandboard=S.brandboard||[];S.kb=S.kb||[];keyify(S);log("Imported "+f.name);render()}}catch(x){alert("Not a valid Project Norwood JSON file")}};r.readAsText(f)};
- if($("#rs"))$("#rs").onclick=()=>{if(confirm("Reset all data to defaults "+who+"?")){S=Object.assign(clone(SEED),{brandboard:S.brandboard||[],kb:S.kb||[]});S.activity=[];keyify(S,true);log("Reset to defaults");render()}};
+
  if($("#so"))$("#so").onclick=()=>{if(confirm("Sign out? This browser keeps its copy but stops syncing until you join again.")){needLogin("");$("#login").close();render()}};
  bindNotif();if($("#si"))$("#si").onclick=()=>showLogin();
  if($("#xb"))$("#xb").onclick=()=>dl("norwood-hq-old-local-copy.json",localStorage.getItem(KEY+".presync"),"application/json")};

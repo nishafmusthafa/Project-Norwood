@@ -53,7 +53,6 @@ To run locally, open `index.html` directly. Or run `python3 -m http.server` in t
   - export and import JSON
   - export tasks as CSV
   - export deadlines as `.ics` (import into Google or Outlook Calendar)
-  - reset to defaults
 - Dark/light toggle, responsive layout for phones, keyboard-focus styles and ARIA labels.
 
 ## Signing in and who can change what
@@ -65,7 +64,7 @@ Each person signs in with their **name and personal 6-digit PIN**. Nishaf gives 
 | Status, progress and dates on **their own** tasks | ✅ | ✅ |
 | Notes on any task | ✅ | ✅ (in their own name) |
 | RAID log and questions | ✅ all | ✅ edit and raise their own |
-| Launch checklist, KPIs, team list, import/reset | ✅ | ❌ |
+| Launch checklist, KPIs, team list, import | ✅ | ❌ |
 | Menu prices | ✅ | Mammad only |
 | Brand board and knowledge base | ✅ all | ✅ add; edit their own |
 | Delete anything | ✅ | ❌ |
