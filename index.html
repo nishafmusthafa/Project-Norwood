@@ -2,7 +2,9 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<meta name="color-scheme" content="light dark">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.json"><meta name="theme-color" content="#D62828"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Project Norwood">
 <title>Project Norwood</title>
 <style>
@@ -96,11 +98,68 @@ main{padding:.5rem}.kan{grid-template-columns:repeat(4,80vw)}.cal div{min-height
 #toast{position:fixed;left:50%;bottom:1rem;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:.6rem 1rem;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;z-index:30}#toast.show{opacity:1}
 input:disabled,select:disabled{opacity:.6;cursor:not-allowed}
 @media print{header,nav,.filters,button{display:none!important}}
+
+/* ===== Mobile: native feel (tap, zoom, safe areas) and phone layout ===== */
+html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+button,a,[role=button],select,summary,label,.tile,.tline{touch-action:manipulation}
+button,[role=button],.chipbtn,.seg button,nav button,summary,.tile,.tline{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+button{transition:transform .1s ease-out,background .1s}button:active:not(:disabled){transform:scale(.97)}
+nav .ico,nav [data-menu]{display:none}
+#sheet{padding:0}
+.sheet-grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:.6rem auto .4rem}
+.sheet-who{padding:.25rem 1.25rem .75rem}
+.sheet-list{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;padding:0 1rem}
+.sheet-list button{display:flex;align-items:center;gap:.6rem;justify-content:flex-start;min-height:52px;font-weight:650;text-align:left}
+.sheet-list button[aria-current=page]{background:var(--acc);color:#fff;border-color:var(--acc)}
+.sheet-list .ico{font-size:1.2rem;width:1.4rem;text-align:center}
+.sheet-foot{display:flex;gap:.5rem;padding:1rem}.sheet-foot button{flex:1}
+/* touch screens: finger-sized controls, no iOS zoom on inputs, no sticky hover */
+@media (pointer:coarse){
+ input,select,textarea{font-size:16px}
+ button,select,input:not([type=checkbox]):not([type=radio]):not([type=file]),summary{min-height:44px}
+ input[type=checkbox]{width:22px;height:22px}
+ .chipbtn{min-height:42px}
+}
+@media (hover:none){
+ .card:hover,.tile:hover{box-shadow:0 1px 2px #0000000a,0 4px 14px #0000000a}
+ nav button:hover:not([aria-current]){background:transparent}
+ .mb-cats a:hover:not(.on){background:transparent;color:var(--m-ink);border-color:color-mix(in srgb,var(--m-acc) 40%,transparent)}
+ .tline:hover{text-decoration:none}
+}
+@media (max-width:760px){
+ header{position:sticky;top:0;z-index:20;flex-wrap:nowrap;gap:.35rem;padding:calc(.45rem + env(safe-area-inset-top,0px)) max(.75rem,env(safe-area-inset-right,0px)) .45rem max(.75rem,env(safe-area-inset-left,0px))}
+ header h1{font-size:1.05rem;white-space:nowrap;margin:0}
+ #who,#theme{display:none}
+ #sync .lbl{display:none}#sync{padding:0 .7rem;min-width:44px}
+ #savebtn,#bell{padding:0 .6rem}
+ nav{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:25;display:grid;grid-template-columns:repeat(5,1fr);gap:0;width:auto;overflow:visible;flex-wrap:nowrap;margin:0;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -4px 16px #0000000f;padding:.2rem max(.25rem,env(safe-area-inset-left,0px)) calc(.2rem + env(safe-area-inset-bottom,0px)) max(.25rem,env(safe-area-inset-right,0px))}
+ nav button{display:none;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;border:0;background:none;color:var(--mut);font-size:.7rem;font-weight:650;padding:.3rem .1rem;min-height:54px;border-radius:12px;white-space:nowrap}
+ nav button[data-v=dashboard],nav button[data-v=mine],nav button[data-v=plan],nav button[data-v=brand],nav button[data-menu]{display:flex}
+ nav .ico{display:block;font-size:1.3rem;line-height:1}
+ nav button[aria-current=page],nav button[aria-current=page]:hover{background:color-mix(in srgb,var(--acc) 10%,transparent);color:var(--acc)}
+ main{padding:1rem max(.9rem,env(safe-area-inset-right,0px)) calc(5.75rem + env(safe-area-inset-bottom,0px)) max(.9rem,env(safe-area-inset-left,0px))}
+ h2{font-size:1.4rem;margin:.25rem 0 .4rem}
+ .grid{grid-template-columns:1fr;gap:.75rem}.card{margin-bottom:.75rem}
+ .big{font-size:1.8rem}
+ #toast{bottom:calc(5.25rem + env(safe-area-inset-bottom,0px));width:max-content;max-width:calc(100vw - 2rem);text-align:center}
+ dialog{width:100%;max-width:100%;max-height:90dvh;margin:auto 0 0;border-radius:20px 20px 0 0;border-bottom:0;padding-bottom:calc(1rem + env(safe-area-inset-bottom,0px));overscroll-behavior:contain}
+ #sheet{padding-bottom:env(safe-area-inset-bottom,0px)}
+ .filters{gap:.5rem}.filters input,.filters select{flex:1 1 calc(50% - .5rem);min-width:0}.pf input{flex-basis:100%}.pf .pri{flex:1 1 100%}
+ .seg{display:flex;width:100%}.seg button{flex:1;padding:.5rem .3rem}
+ .strip{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 calc(-1 * max(.9rem,env(safe-area-inset-left,0px))) .9rem;padding:0 max(.9rem,env(safe-area-inset-left,0px))}.strip::-webkit-scrollbar{display:none}.chipbtn{white-space:nowrap;flex:none}
+ .work .qbtns{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));width:100%}.work .qbtns button{white-space:nowrap;padding:0 .3rem;font-size:.85rem}
+ dialog:focus{outline:none}
+ .tw,.kan{overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+ .kan{scroll-snap-type:x mandatory;grid-template-columns:repeat(4,85vw)}.kan>*{scroll-snap-align:start}
+ .mb-top{bottom:calc(6rem + env(safe-area-inset-bottom,0px))}
+ .mb-items{grid-template-columns:1fr}
+}
+@media (max-width:380px){.h1a{display:none}}
 </style>
 </head>
 <body>
 <header>
-<h1>Project Norwood</h1>
+<h1><span class="h1a">Project </span>Norwood</h1>
 <nav id="nav" aria-label="Main"></nav>
 <span class="sp"></span>
 <button id="savebtn" class="small" style="display:none" aria-live="polite">Save changes</button>
@@ -110,6 +169,7 @@ input:disabled,select:disabled{opacity:.6;cursor:not-allowed}
 <button id="theme" aria-label="Toggle dark mode">◐</button>
 </header>
 <main id="app" tabindex="-1"></main>
+<dialog id="sheet" aria-label="All sections"><div id="sheetc"></div></dialog>
 <dialog id="dlg"><form method="dialog" id="dlgf"></form></dialog>
 <dialog id="login" aria-labelledby="lgh"><form id="lgf">
 <h3 id="lgh">Sign in to Project Norwood</h3>
@@ -173,7 +233,7 @@ async function call(fn,args){const j=await rpc(fn,Object.assign({p_name:sync.nam
  if(j&&j.role&&j.role!==sync.role){sync.role=j.role;storeMe();fillMe();render()}return j}
 function setSync(st,err){sync.state=st;sync.err=err||"";const b=$("#sync");if(!b)return;
  const n=sync.peers.length,t={live:"● Live"+(n>1?" · "+n+" online":""),saving:"● Saving…",connecting:"● Connecting…",offline:"● Offline – saved here",off:"● Not signed in"}[st]||st;
- b.textContent=t;b.style.color=st==="live"?"var(--ok)":st==="offline"||st==="off"?"var(--warn)":"var(--mut)";
+ b.innerHTML='<span aria-hidden="true">●</span><span class="lbl"> '+esc(String(t).replace(/^● /,""))+"</span>";b.setAttribute("aria-label","Sync: "+String(t).replace(/^● /,""));b.style.color=st==="live"?"var(--ok)":st==="offline"||st==="off"?"var(--warn)":"var(--mut)";
  paintSave();
  b.title=(st==="live"?"Shared data is live."+(n?" Online: "+sync.peers.join(", "):""):st==="offline"?"Can't reach the server. Changes are kept in this browser and will sync when it reconnects. "+sync.err:st==="off"?"Click to sign in.":"")}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}schedulePush();paintSave()}
@@ -261,8 +321,9 @@ function setHdr(){const h=document.querySelector("header");if(h&&getComputedStyl
 window.addEventListener("resize",setHdr);
 function render(){
  applyTheme();setTimeout(setHdr,0);
- $("#nav").innerHTML=Object.entries(VIEWS).map(([k,v])=>`<button data-v="${k}"${k===view?' aria-current="page"':""}>${v}</button>`).join("");
- $("#nav").querySelectorAll("button").forEach(b=>b.onclick=()=>{view=b.dataset.v;localStorage.setItem(KEY+".view",view);render();$("#app").focus()});
+ $("#nav").innerHTML=Object.entries(VIEWS).map(([k,v])=>`<button data-v="${k}"${k===view?' aria-current="page"':""}><span class="ico" aria-hidden="true">${ICON[k]||"•"}</span><span class="lbl">${v}</span></button>`).join("")+`<button data-menu aria-label="All sections"${PRIMARY.includes(view)?"":' aria-current="page"'}><span class="ico" aria-hidden="true">☰\uFE0E</span><span class="lbl">More</span></button>`;
+ $("#nav").querySelectorAll("button[data-v]").forEach(b=>b.onclick=()=>{view=b.dataset.v;localStorage.setItem(KEY+".view",view);render();scrollTo(0,0);$("#app").focus({preventScroll:true})});
+ $("#nav").querySelector("[data-menu]").onclick=openSheet;
  $("#app").innerHTML=(R[view]||R.dashboard)();(A[view]||(()=>{}))();
 }
 const R={},A={};
@@ -471,7 +532,7 @@ function applyTheme(){const t=(S&&S.theme&&hexes((S.theme.colours||[]).join(" ")
  const hi=c.find(x=>x!==acc&&lum(x)>.22&&lum(x)<.8)||acc, bg=c.find(x=>lum(x)>.82);
  let el=$("#themecss");if(!el){el=document.createElement("style");el.id="themecss";document.head.appendChild(el)}
  el.textContent=`:root{--acc:${acc};--hi:${hi}}:root:not([data-theme=dark]){${bg?`--bg:${bg};`:""}--chip:color-mix(in srgb,${acc} 9%,#fff);--line:color-mix(in srgb,${acc} 14%,#e2e2e2)}[data-theme=dark]{--acc:color-mix(in srgb,${acc} 70%,#fff)}`;
- const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=acc}
+ const m=document.querySelector('meta[name="theme-color"]');if(m){const h=document.querySelector("header");m.content=h?getComputedStyle(h).backgroundColor:acc}}
 function setAppColours(name,colours){if(!isAdmin()){toast(ADMIN_NOTE);return}const c=hexes(colours.join(" "));if(c.length<2){toast("Needs at least two colours.");return}
  S.theme={name,colours:c};log("App colours set to "+name);render();toast("App colours changed to “"+name+"” for everyone.")}
 /* ---------- Menu board: scroll-down digital menu in the brand palette ---------- */
@@ -610,13 +671,33 @@ function drillPanel(scope,k,list){const L=[...list].sort((a,c)=>a.due.localeComp
 function bindDrill(){document.querySelectorAll("[data-drill]").forEach(el=>{const go=()=>{ui.drill=ui.drill===el.dataset.drill?"":el.dataset.drill;render();setTimeout(()=>{const d=$("#drill");if(d&&ui.drill)d.scrollIntoView({block:"nearest"})},0)};
  el.onclick=e=>{if(e.target.closest("a,button")&&e.target.closest("[data-drill]")!==el)return;go()};
  if(el.tagName!=="BUTTON"){el.tabIndex=0;el.setAttribute("role","button");el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}}}})}
+/* ---------- Phone layout: bottom tab bar, "More" sheet, card lists ---------- */
+const PRIMARY=["dashboard","mine","plan","brand"];
+const ICON={dashboard:"⌂︎",mine:"✓︎",plan:"▤︎",logs:"⚑︎",brand:"◆︎",menuboard:"☷︎",growth:"↗︎",knowledge:"✦︎",team:"☺︎",more:"⋯"};
+const isPhone=()=>window.matchMedia&&matchMedia("(max-width:760px)").matches;
+function openSheet(){const d=$("#sheet");$("#sheetc").innerHTML=`<div class="sheet-grab" aria-hidden="true"></div>
+ <div class="sheet-who">${signedIn()?`<b>${esc(me())}</b> <span class="chip ${isAdmin()?"st-Done":""}">${isAdmin()?"Full access":"Team member"}</span>`:'<span class="mut">View only</span>'}</div>
+ <div class="sheet-list">${Object.entries(VIEWS).map(([k,v])=>`<button data-sv="${k}"${k===view?' aria-current="page"':""}><span class="ico" aria-hidden="true">${ICON[k]||"•"}</span>${v}</button>`).join("")}</div>
+ <div class="sheet-foot"><button id="sh-theme">◐ ${document.documentElement.dataset.theme==="dark"?"Light":"Dark"} mode</button>${signedIn()?"":'<button id="sh-in" class="pri">Sign in</button>'}<button id="sh-close">Close</button></div>`;
+ d.querySelectorAll("[data-sv]").forEach(b=>b.onclick=()=>{view=b.dataset.sv;localStorage.setItem(KEY+".view",view);d.close();render();scrollTo(0,0)});
+ $("#sh-theme").onclick=()=>{$("#theme").click();d.close();render()};$("#sh-close").onclick=()=>d.close();if($("#sh-in"))$("#sh-in").onclick=()=>{d.close();showLogin()};
+ d.onclick=e=>{if(e.target===d)d.close()};d.showModal()}
+/* phones: opening a form should not pop the keyboard up straight away */
+(function(){const sm=HTMLDialogElement.prototype.showModal;HTMLDialogElement.prototype.showModal=function(){sm.call(this);if(isPhone()&&this.id!=="login"){const a=document.activeElement;if(a&&a.matches&&a.matches("input,textarea,select")){a.blur();this.focus()}}}})();
+if(window.matchMedia){const mq=matchMedia("(max-width:760px)");(mq.addEventListener?mq.addEventListener("change",()=>render()):mq.addListener(()=>render()))}
+function phoneTasks(){const f=ui.f,ts=filtered();
+ return `<div class="filters pf" role="search"><input id="pq" type="search" enterkeyhint="search" placeholder="Search tasks…" aria-label="Search tasks" value="${esc(f.q)}"><select id="ps" aria-label="Status">${opt(STATUSES,f.status,"All statuses")}</select><select id="po" aria-label="Owner">${opt(owners(),f.owner,"All owners")}</select>${isAdmin()?'<button class="pri" id="padd">+ Add task</button>':""}</div>
+ <p class="small mut">${ts.length} task${ts.length===1?"":"s"} · tap a task to open it</p><div class="card" style="padding:.25rem 1rem"><ul class="worklist">${ts.map(workRow).join("")||'<li class="mut" style="padding:1rem 0">No tasks match.</li>'}</ul></div>`}
+function bindPhoneTasks(){const f=ui.f;$("#pq").oninput=e=>{f.q=e.target.value;const p=e.target.selectionStart;render();const i=$("#pq");i.focus();try{i.setSelectionRange(p,p)}catch(x){}};
+ $("#ps").onchange=e=>{f.status=e.target.value;render()};$("#po").onchange=e=>{f.owner=e.target.value;render()};if($("#padd"))$("#padd").onclick=()=>editTask(null);
+ bindEdit();document.querySelectorAll("[data-qs]").forEach(b=>b.onclick=()=>setField(b.dataset.qs,"status",b.dataset.v))}
 /* ---------- Simple navigation: Plan and More group the detailed views ---------- */
 function seg(key,opts,cur){return `<div class="seg" role="group" aria-label="View">${opts.map(([k,l])=>`<button data-seg="${key}" data-val="${k}" aria-pressed="${k===cur}">${l}</button>`).join("")}</div>`}
 function bindSeg(){document.querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{ui[b.dataset.seg]=b.dataset.val;if(b.dataset.seg==="plan")ui.mode=b.dataset.val==="board"?"kanban":"table";render()})}
 const PLAN=[["list","List"],["board","Board"],["timeline","Timeline"],["calendar","Calendar"]];
-R.plan=()=>{const p=ui.plan||"list",inner=p==="timeline"?R.gantt():p==="calendar"?R.calendar():(ui.mode=p==="board"?"kanban":"table",R.tasks());
+R.plan=()=>{const p=ui.plan||"list",inner=p==="timeline"?R.gantt():p==="calendar"?R.calendar():p==="list"&&isPhone()?phoneTasks():(ui.mode=p==="board"?"kanban":"table",R.tasks());
  return `<h2>Plan</h2><p class="small mut">Every task to opening day. Switch between a list, a board you can drag cards on, a timeline and a calendar.</p>${seg("plan",PLAN,p)}`+inner.replace(/^<h2>(Tasks|Gantt)<\/h2>/,"")};
-A.plan=()=>{bindSeg();const p=ui.plan||"list";(p==="timeline"?A.gantt:p==="calendar"?A.calendar:A.tasks)()};
+A.plan=()=>{bindSeg();const p=ui.plan||"list";(p==="timeline"?A.gantt:p==="calendar"?A.calendar:p==="list"&&isPhone()?bindPhoneTasks:A.tasks)()};
 R.more=()=>{const p=ui.more||"reference";return `<h2>More</h2>${seg("more",[["reference","Menu table, KPIs & area"],["data","Backup & sharing"]],p)}`+(p==="data"?R.data():R.reference()).replace(/^<h2>(Reference|Data)<\/h2>/,"")};
 A.more=()=>{bindSeg();((ui.more||"reference")==="data"?A.data:A.reference)()};
 /* ---------- My work: one simple page per person ---------- */
