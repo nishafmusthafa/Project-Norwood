@@ -114,6 +114,7 @@ Added once by the first Nishaf or Fanshad sign-in. It only adds items that don't
   - split the page into modules with a build step.
 
 ## Live sync
+- **Save changes button (top right):** changes save automatically within about a second. The button shows **Save changes (n)** while edits are waiting, **Saving…** while working and **✓ All saved** when everything is stored. Clicking it saves immediately, including a cell you are still typing in. Closing the page with unsaved changes asks you to confirm first.
 - Each item is stored as its own row, so people editing different things never overwrite each other.
 - Changes appear for others in about a second, and every open copy also re-checks every 20 seconds.
 - Offline edits are queued and sync when the connection returns.

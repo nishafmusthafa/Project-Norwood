@@ -50,6 +50,7 @@ h2,h3{letter-spacing:-.01em}h2{font-weight:800}
 nav button{font-weight:600;padding:.45rem .55rem;font-size:.93rem}nav button:hover{background:color-mix(in srgb,var(--acc) 10%,transparent)}nav button[aria-current=page],nav button[aria-current=page]:hover{background:var(--acc);color:#fff}
 header{gap:.4rem}header h1{margin-right:.5rem}#who .chip{font-size:.7rem}
 @media(max-width:1340px){#who .chip{display:none}}
+@media(max-width:1420px){nav button{padding:.4rem .42rem;font-size:.9rem}header h1{font-size:1.1rem;margin-right:.25rem}#sync,#savebtn,#bell{padding-left:.5rem;padding-right:.5rem}}
 button.pri{box-shadow:0 2px 0 color-mix(in srgb,var(--acc) 60%,#000)}button.pri:active{transform:translateY(1px);box-shadow:none}
 .note{border-left-color:var(--hi)}
 a{color:var(--acc);text-underline-offset:2px}a:hover{color:color-mix(in srgb,var(--acc) 75%,#000)}[data-theme=dark] a{color:color-mix(in srgb,var(--acc) 55%,#fff)}
@@ -79,6 +80,7 @@ a{color:var(--acc);text-underline-offset:2px}a:hover{color:color-mix(in srgb,var
 .mb-foot .sw{width:16px;height:16px}
 .mb-top{position:sticky;bottom:1rem;float:right;margin:-3.2rem 1rem 0 0;z-index:6;background:var(--m-acc);color:#fff;border:0;border-radius:999px;padding:.5rem .9rem;font-weight:800;box-shadow:0 4px 12px #00000030}
 @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+#savebtn{font-weight:700;white-space:nowrap}#savebtn.ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,var(--line))}
 .seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin:.25rem 0 1rem}.seg button{border:0;border-radius:0;background:var(--card);padding:.5rem 1rem;font-weight:600}.seg button[aria-pressed=true]{background:var(--acc);color:#fff}
 .worklist{list-style:none;padding:0;margin:0}.work{display:flex;gap:.75rem;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--line)}.work:last-child{border-bottom:0}.qbtns{display:flex;gap:.35rem;flex-wrap:wrap;justify-content:flex-end}
 details.card summary{cursor:pointer}
@@ -94,6 +96,7 @@ input:disabled,select:disabled{opacity:.6;cursor:not-allowed}
 <h1>Project Norwood</h1>
 <nav id="nav" aria-label="Main"></nav>
 <span class="sp"></span>
+<button id="savebtn" class="small" style="display:none" aria-live="polite">Save changes</button>
 <button id="bell" class="small" aria-label="Turn on notifications" style="display:none">🔕</button>
 <button id="sync" class="small" aria-live="polite" title="Sync status">…</button>
 <span id="who" class="small"></span>
@@ -164,8 +167,9 @@ async function call(fn,args){const j=await rpc(fn,Object.assign({p_name:sync.nam
 function setSync(st,err){sync.state=st;sync.err=err||"";const b=$("#sync");if(!b)return;
  const n=sync.peers.length,t={live:"● Live"+(n>1?" · "+n+" online":""),saving:"● Saving…",connecting:"● Connecting…",offline:"● Offline – saved here",off:"● Not signed in"}[st]||st;
  b.textContent=t;b.style.color=st==="live"?"var(--ok)":st==="offline"||st==="off"?"var(--warn)":"var(--mut)";
+ paintSave();
  b.title=(st==="live"?"Shared data is live."+(n?" Online: "+sync.peers.join(", "):""):st==="offline"?"Can't reach the server. Changes are kept in this browser and will sync when it reconnects. "+sync.err:st==="off"?"Click to sign in.":"")}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}schedulePush()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}schedulePush();paintSave()}
 function schedulePush(){if(!signedIn()||!sync.base)return;clearTimeout(sync.pushT);sync.pushT=setTimeout(push,300)}
 async function push(){if(!signedIn()||!sync.base)return;if(sync.pushing){sync.again=true;return}
  const cur=flat(S),ch=[];for(const [k,x] of Object.entries(cur))if(sync.base[k]!==x.j)ch.push({c:x.c,i:x.i,d:x.d,k,j:x.j});
@@ -180,7 +184,7 @@ async function push(){if(!signedIn()||!sync.base)return;if(sync.pushing){sync.ag
   storeBase();setSync("live");notify();sendNotify(sent);
   if(why.length){toast("Not saved: "+why[0]+(why.length>1?" ("+why.length+" changes undone)":""));pullSoon(50)}}
  catch(e){if(e.auth)return needLogin(e.message);setSync("offline",e.message);clearTimeout(sync.pushT);sync.pushT=setTimeout(push,8000)}
- finally{sync.pushing=false;if(sync.again){sync.again=false;schedulePush()}}}
+ finally{sync.pushing=false;paintSave();if(sync.again){sync.again=false;schedulePush()}}}
 const busy=()=>{const a=document.activeElement;return $("#dlg").open||(a&&(a.isContentEditable||a.tagName==="TEXTAREA"||(a.tagName==="INPUT"&&a.type!=="checkbox"&&a.type!=="file")))};
 function pullSoon(ms){clearTimeout(sync.pullT);sync.pullT=setTimeout(pull,ms||250)}
 async function pull(){if(!signedIn())return;if(busy()){sync.pendingPull=true;return}
@@ -223,7 +227,7 @@ function bindLogin(){const d=$("#login");
   catch(x){$("#lge").textContent=x.net?"Can't reach the server. Check your connection, or view only for now.":"Error: "+x.message}
   finally{$("#lgs").disabled=false}};
  $("#lgo").onclick=()=>{d.close();setSync("off")};
- $("#sync").onclick=()=>{if(!signedIn())showLogin();else pull()};$("#bell").onclick=enableNotifs}
+ $("#sync").onclick=()=>{if(!signedIn())showLogin();else pull()};$("#bell").onclick=enableNotifs;$("#savebtn").onclick=saveNow}
 function fillMe(){paintBell();const w=$("#who");if(!w)return;w.innerHTML=signedIn()?`<b>${esc(me())}</b> <span class="chip ${isAdmin()?"st-Done":""}">${isAdmin()?"Full access":"Team member"}</span>`:'<span class="mut">View only</span>'}
 function log(msg){S.activity.unshift({at:new Date().toISOString(),who:me()||"Unknown",msg});S.activity=S.activity.slice(0,500);save()}
 function task(id){return S.tasks.find(t=>t.id===id)}
@@ -244,7 +248,7 @@ async function init(){
  render();bindLogin();
  if(signedIn())connect();else{setSync("off");showLogin()}
 }
-const VIEWS={dashboard:"Home",mine:"My work",plan:"Plan",logs:"Risks & decisions",brand:"Brand",menuboard:"Menu",growth:"Franchise growth",knowledge:"Knowledge",team:"Team",more:"More"};
+const VIEWS={dashboard:"Home",mine:"My work",plan:"Plan",logs:"Risks & decisions",brand:"Brand",menuboard:"Menu",growth:"Franchise",knowledge:"Knowledge",team:"Team",more:"More"};
 if({tasks:1,gantt:1,calendar:1}[view])view="plan";if({reference:1,data:1}[view])view="more";
 function setHdr(){const h=document.querySelector("header");if(h&&getComputedStyle(h).position==="sticky")document.documentElement.style.setProperty("--hdr",h.offsetHeight+"px");else document.documentElement.style.setProperty("--hdr","0px")}
 window.addEventListener("resize",setHdr);
@@ -407,6 +411,25 @@ R.reference=()=>{const b=S.brand;const cats=[...new Set(S.menu.map(m=>m.category
  <div class="card"><h3>Catchment highlights</h3><ul>${S.catchment.map(c=>`<li>${esc(c)}</li>`).join("")}</ul><p class="small mut">Sources as cited in the Business Requirements Document (Census 2021, IoD 2019, postcodes.io). Distances are straight-line estimates.</p></div>
  <div class="card"><h3>Brand proposals <span class="chip">PROPOSALS – no decision made</span></h3><p class="small">${esc(b.note)}</p><table>${b.names.map(n=>`<tr><td><b>${esc(n[0])}</b></td><td class="small">${esc(n[1])}</td></tr>`).join("")}</table><div class="grid" style="margin-top:1rem">${b.styles.map(s=>`<div><b>${esc(s.name)}</b><div>${s.palette.map(c=>`<span class="sw" style="background:${esc(c)}" title="${esc(c)}"></span>`).join(" ")}</div><div class="small">${esc(s.palette.join(" · "))}</div><div class="small">Type: ${esc(s.type)}</div><div class="small mut">Tone: ${esc(s.tone)}</div></div>`).join("")}</div></div>`};
 A.reference=()=>document.querySelectorAll("[data-mp]").forEach(el=>el.onblur=()=>{const m=S.menu[+el.dataset.mp],v=el.textContent.trim();if(v!==m.price){const o=m.price;m.price=v;log(`Menu price ${m.item}: ${o} → ${v}`)}});
+/* ---------- Save changes button (saving is automatic; this shows the state and saves immediately) ---------- */
+function unsaved(){if(!signedIn()||!sync.base)return 0;let n=0;try{const cur=flat(S);for(const [k,x] of Object.entries(cur))if(!k.startsWith("activity|")&&sync.base[k]!==x.j)n++;for(const k of Object.keys(sync.base))if(!k.startsWith("activity|")&&!cur[k])n++}catch(e){}return n}
+let typing=false;
+function paintSave(){const b=$("#savebtn");if(!b)return;if(!signedIn()){b.style.display="none";return}b.style.display="";
+ const n=unsaved();b.classList.remove("pri","ok");b.disabled=false;
+ if(sync.state==="saving"){b.textContent="Saving…"}
+ else if(typing||n){b.textContent="Save changes"+(n?" ("+n+")":"");b.classList.add("pri");b.title="Save your changes for the team now"}
+ else if(sync.state==="offline"){b.textContent="Save changes";b.classList.add("pri");b.title="Offline – your changes are kept here and will save when you reconnect"}
+ else{b.textContent="✓ All saved";b.classList.add("ok");b.title="Everything is saved for the team"}}
+let savingNow=false;
+async function saveNow(){if(savingNow)return;savingNow=true;try{await saveNow2()}finally{savingNow=false}}
+async function saveNow2(){const a=document.activeElement;if(a&&a!==document.body&&a.blur)a.blur();typing=false;
+ const idle=async()=>{for(let i=0;i<80&&sync.pushing;i++)await new Promise(r=>setTimeout(r,100))};
+ await new Promise(r=>setTimeout(r,60));clearTimeout(sync.pushT);await idle();await push();await idle();if(unsaved()&&sync.state!=="offline"){await push();await idle()}await pull();paintSave();
+ if(sync.state==="offline")toast("You're offline – changes are kept on this device and will save automatically when you reconnect.");
+ else if(!unsaved())toast("All changes saved for the team.")}
+document.addEventListener("input",e=>{if(e.target.closest&&e.target.closest("#app")){typing=true;paintSave()}});
+document.addEventListener("focusout",()=>{setTimeout(()=>{typing=false;paintSave()},400)});
+window.addEventListener("beforeunload",e=>{if(signedIn()&&(unsaved()||sync.pushing)){e.preventDefault();e.returnValue=""}});
 /* ---------- Notifications (web push via the Supabase function hq-notify) ---------- */
 const VAPID="BBu4D5eqoZ48reMJwFenGxuX8GolUjofGETauyQSj8Vo1mQR6I20R72iQ2efhJSFEu38nqQ-U53k2K9JWAJ0EFs";
 const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent),standalone=(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;
