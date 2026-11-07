@@ -131,6 +131,7 @@ nav .ico,nav [data-menu]{display:none}
 .sheet-list button{display:flex;align-items:center;gap:.6rem;justify-content:flex-start;min-height:52px;font-weight:650;text-align:left}
 .sheet-list button[aria-current=page]{background:var(--acc);color:#fff;border-color:var(--acc)}
 .sheet-list .ico{font-size:1.2rem;width:1.4rem;text-align:center}
+.sheet-ver{padding:.25rem 1.25rem 0;margin:.5rem 0 0;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .sheet-foot{display:flex;gap:.5rem;padding:1rem}.sheet-foot button{flex:1}
 /* touch screens: finger-sized controls, no iOS zoom on inputs, no sticky hover */
 @media (pointer:coarse){
@@ -151,9 +152,9 @@ nav .ico,nav [data-menu]{display:none}
  #who,#theme{display:none}
  #sync .lbl{display:none}#sync{padding:0 .7rem;min-width:44px}
  #savebtn,#bell{padding:0 .6rem}
- nav{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:25;display:grid;grid-template-columns:repeat(5,1fr);gap:0;width:auto;overflow:visible;flex-wrap:nowrap;margin:0;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -4px 16px #0000000f;padding:.2rem max(.25rem,env(safe-area-inset-left,0px)) calc(.2rem + env(safe-area-inset-bottom,0px)) max(.25rem,env(safe-area-inset-right,0px))}
- nav button{display:none;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;border:0;background:none;color:var(--mut);font-size:.7rem;font-weight:650;padding:.3rem .1rem;min-height:54px;border-radius:12px;white-space:nowrap}
- nav button[data-v=dashboard],nav button[data-v=mine],nav button[data-v=plan],nav button[data-v=todo],nav button[data-menu]{display:flex}
+ nav{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:25;display:grid;grid-template-columns:repeat(6,1fr);gap:0;width:auto;overflow:visible;flex-wrap:nowrap;margin:0;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -4px 16px #0000000f;padding:.2rem max(.25rem,env(safe-area-inset-left,0px)) calc(.2rem + env(safe-area-inset-bottom,0px)) max(.25rem,env(safe-area-inset-right,0px))}
+ nav button{display:none;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;border:0;background:none;color:var(--mut);font-size:.66rem;font-weight:650;padding:.3rem .1rem;min-height:54px;border-radius:12px;white-space:nowrap}
+ nav button[data-v=dashboard],nav button[data-v=mine],nav button[data-v=plan],nav button[data-v=todo],nav button[data-v=money],nav button[data-menu]{display:flex}
  nav .ico{display:block;font-size:1.3rem;line-height:1}
  nav button[aria-current=page],nav button[aria-current=page]:hover{background:color-mix(in srgb,var(--acc) 10%,transparent);color:var(--acc)}
  main{padding:1rem max(.9rem,env(safe-area-inset-right,0px)) calc(5.75rem + env(safe-area-inset-bottom,0px)) max(.9rem,env(safe-area-inset-left,0px))}
@@ -219,7 +220,7 @@ const me=()=>sync.name||"";
  copy, so the app still works offline and pushes queued changes when it reconnects. */
 const SB={url:"https://ufinmrgnqwutxwntcdvs.supabase.co",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmaW5tcmducXd1dHh3bnRjZHZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNTQ3NzQsImV4cCI6MjEwNjgzMDc3NH0.OH5ZXB5eUSDWsDdRcn63Vm0fGSbC-eCg-JgHY_2c4Uo"};
 if(window.NORWOOD_SB)Object.assign(SB,window.NORWOOD_SB);
-const APP_VER="2026-11-07c";
+const APP_VER="2026-11-07d";
 const COLLS=["team","tasks","raid","questions","menu","kpis","checklist","activity","brandboard","kb","growth","todos","budget","expenses"];
 const sync={pin:localStorage.getItem(KEY+".pin")||"",name:localStorage.getItem(KEY+".name")||"",role:localStorage.getItem(KEY+".role")||"",base:null,state:"off",peers:[],pushT:0,pullT:0,pushing:false,again:false,pendingPull:false,chan:null,err:""};
 /* ---------- Access rules (the server enforces the same rules; this only shapes the screen) ----------
@@ -696,7 +697,7 @@ function bindDrill(){document.querySelectorAll("[data-drill]").forEach(el=>{cons
  el.onclick=e=>{if(e.target.closest("a,button")&&e.target.closest("[data-drill]")!==el)return;go()};
  if(el.tagName!=="BUTTON"){el.tabIndex=0;el.setAttribute("role","button");el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}}}})}
 /* ---------- Phone layout: bottom tab bar, "More" sheet, card lists ---------- */
-const PRIMARY=["dashboard","mine","todo","plan"];
+const PRIMARY=["dashboard","mine","todo","money","plan"];
 /* "More" shows as current when the open section is one of those tucked into it at this screen size */
 function markMenu(){const n=$("#nav");if(!n)return;const mb=n.querySelector("[data-menu]"),cur=n.querySelector(`[data-v="${view}"]`);if(!mb)return;if(cur&&getComputedStyle(cur).display==="none")mb.setAttribute("aria-current","page");else mb.removeAttribute("aria-current")}
 window.addEventListener("resize",markMenu);
@@ -705,8 +706,10 @@ const isPhone=()=>window.matchMedia&&matchMedia("(max-width:760px)").matches;
 function openSheet(){const d=$("#sheet");$("#sheetc").innerHTML=`<div class="sheet-grab" aria-hidden="true"></div>
  <div class="sheet-who">${signedIn()?`<b>${esc(me())}</b> <span class="chip ${isAdmin()?"st-Done":""}">${isAdmin()?"Full access":"Team member"}</span>`:'<span class="mut">View only</span>'}</div>
  <div class="sheet-list">${Object.entries(VIEWS).map(([k,v])=>`<button data-sv="${k}"${k===view?' aria-current="page"':""}><span class="ico" aria-hidden="true">${ICON[k]||"•"}</span>${v}</button>`).join("")}</div>
+ <p class="small mut sheet-ver">Version ${APP_VER} · <button class="small" id="sh-reload">↻ Reload app</button></p>
  <div class="sheet-foot"><button id="sh-theme">◐ ${document.documentElement.dataset.theme==="dark"?"Light":"Dark"} mode</button>${signedIn()?"":'<button id="sh-in" class="pri">Sign in</button>'}<button id="sh-close">Close</button></div>`;
  d.querySelectorAll("[data-sv]").forEach(b=>b.onclick=()=>{view=b.dataset.sv;localStorage.setItem(KEY+".view",view);d.close();render();scrollTo(0,0)});
+ $("#sh-reload").onclick=()=>{d.close();location.reload()};
  $("#sh-theme").onclick=()=>{$("#theme").click();d.close();render()};$("#sh-close").onclick=()=>d.close();if($("#sh-in"))$("#sh-in").onclick=()=>{d.close();showLogin()};
  d.onclick=e=>{if(e.target===d)d.close()};d.showModal()}
 /* phones: opening a form should not pop the keyboard up straight away */
