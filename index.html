@@ -102,6 +102,10 @@ a{color:var(--acc);text-underline-offset:2px}a:hover{color:color-mix(in srgb,var
 .ok{color:#2e7d32}
 .todoadd #tdt{width:100%;margin-bottom:.6rem}.todoadd .filters{align-items:flex-end}.todoadd .filters label{display:flex;flex-direction:column;gap:.2rem;flex:1 1 9rem;margin:0}
 .calbtns{display:flex;gap:.5rem;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;justify-content:center;padding:.5rem .9rem;border:1px solid var(--line);border-radius:8px;text-decoration:none;color:var(--fg);background:var(--card);font-weight:650;min-height:42px}.btn.pri{background:var(--acc);color:#fff;border-color:var(--acc)}
+#pop{position:fixed;left:50%;top:calc(.75rem + env(safe-area-inset-top,0px));transform:translate(-50%,-140%);width:min(440px,calc(100vw - 1.5rem));z-index:60;background:var(--card);color:var(--fg);border:2px solid var(--acc);border-radius:16px;box-shadow:0 12px 36px #00000040;padding:.9rem 1rem;transition:transform .25s ease-out}
+#pop.show{transform:translate(-50%,0)}.pop-t{font-weight:800;font-size:1.05rem;color:var(--acc)}.pop-b{margin:.25rem 0 .7rem}.pop-a{display:flex;gap:.5rem;flex-wrap:wrap}.pop-a button{flex:1}
+.caltd{font-size:.75rem;color:var(--acc)}.tlink{flex-basis:100% !important}
+@media (prefers-reduced-motion:reduce){#pop{transition:none}}
 .seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin:.25rem 0 1rem}.seg button{border:0;border-radius:0;background:var(--card);padding:.5rem 1rem;font-weight:600}.seg button[aria-pressed=true]{background:var(--acc);color:#fff}
 .worklist{list-style:none;padding:0;margin:0}.work{display:flex;gap:.75rem;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--line)}.work:last-child{border-bottom:0}.qbtns{display:flex;gap:.35rem;flex-wrap:wrap;justify-content:flex-end}
 details.card summary{cursor:pointer}
@@ -212,6 +216,7 @@ const me=()=>sync.name||"";
  copy, so the app still works offline and pushes queued changes when it reconnects. */
 const SB={url:"https://ufinmrgnqwutxwntcdvs.supabase.co",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmaW5tcmducXd1dHh3bnRjZHZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNTQ3NzQsImV4cCI6MjEwNjgzMDc3NH0.OH5ZXB5eUSDWsDdRcn63Vm0fGSbC-eCg-JgHY_2c4Uo"};
 if(window.NORWOOD_SB)Object.assign(SB,window.NORWOOD_SB);
+const APP_VER="2026-11-07b";
 const COLLS=["team","tasks","raid","questions","menu","kpis","checklist","activity","brandboard","kb","growth","todos"];
 const sync={pin:localStorage.getItem(KEY+".pin")||"",name:localStorage.getItem(KEY+".name")||"",role:localStorage.getItem(KEY+".role")||"",base:null,state:"off",peers:[],pushT:0,pullT:0,pushing:false,again:false,pendingPull:false,chan:null,err:""};
 /* ---------- Access rules (the server enforces the same rules; this only shapes the screen) ----------
@@ -252,11 +257,11 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}schedu
 function schedulePush(){if(!signedIn()||!sync.base)return;clearTimeout(sync.pushT);sync.pushT=setTimeout(push,300)}
 async function push(){if(!signedIn()||!sync.base)return;if(sync.pushing){sync.again=true;return}
  const cur=flat(S),ch=[];for(const [k,x] of Object.entries(cur))if(sync.base[k]!==x.j)ch.push({c:x.c,i:x.i,d:x.d,k,j:x.j});
- for(const k of Object.keys(sync.base))if(!cur[k]){const [c,...r]=k.split("|");if(c==="activity")continue;ch.push({c,i:r.join("|"),d:null,k})}
+ for(const k of Object.keys(sync.base))if(!cur[k]){const [c,...r]=k.split("|");if(c==="activity"||(c!=="_doc"&&!COLLS.includes(c)))continue;ch.push({c,i:r.join("|"),d:null,k})}
  if(!ch.length){if(sync.state==="saving")setSync("live");return}
  sync.pushing=true;setSync("saving");
  try{const why=[],sent=[];for(let o=0;o<ch.length;o+=1000){const part=ch.slice(o,o+1000);
-   const res=await call("hq_push2",{changes:part.map(({c,i,d})=>({c,i,d}))});
+   const res=await call("hq_push3",{p_ver:APP_VER,changes:part.map(({c,i,d})=>({c,i,d}))});
    const rej=new Map((res.rejected||[]).map(x=>[x.c+"|"+x.i,x.why]));
    // accepted: remember as saved. refused: mark "not dirty" so the next pull puts the shared version back
    part.forEach(x=>{if(rej.has(x.k)){why.push(rej.get(x.k));if(x.d===null)delete sync.base[x.k];else sync.base[x.k]=x.j}else{if(x.c==="activity"&&x.d&&x.d.msg)sent.push(x.d.msg);if(x.d===null)delete sync.base[x.k];else sync.base[x.k]=x.j}})}
@@ -267,7 +272,7 @@ async function push(){if(!signedIn()||!sync.base)return;if(sync.pushing){sync.ag
 const busy=()=>{const a=document.activeElement;return $("#dlg").open||(a&&(a.isContentEditable||a.tagName==="TEXTAREA"||(a.tagName==="INPUT"&&a.type!=="checkbox"&&a.type!=="file")))};
 function pullSoon(ms){clearTimeout(sync.pullT);sync.pullT=setTimeout(pull,ms||250)}
 async function pull(){if(!signedIn())return;if(busy()){sync.pendingPull=true;return}
- let rows;try{rows=(await call("hq_pull2")).rows||[]}catch(e){if(e.auth)return needLogin(e.message);setSync("offline",e.message);return}
+ let rows;try{const pr=await call("hq_pull2");rows=pr.rows||[];checkVersion(pr.ver)}catch(e){if(e.auth)return needLogin(e.message);setSync("offline",e.message);return}
  if(busy()){sync.pendingPull=true;return}
  sync.pendingPull=false;const srv={};rows.forEach(r=>{const k=r.collection+"|"+r.id;srv[k]={c:r.collection,i:r.id,d:r.data,j:JSON.stringify(r.data)}});
  const before=JSON.stringify(S);
@@ -280,7 +285,8 @@ async function pull(){if(!signedIn())return;if(busy()){sync.pendingPull=true;ret
  try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
  setSync("live");schedulePush();
  if(isAdmin())seedExpert();
- if(JSON.stringify(S)!==before){fillMe();render()}}
+ if(JSON.stringify(S)!==before){fillMe();render()}
+ checkTodoEvents()}
 setInterval(()=>{if(sync.pendingPull&&!busy())pull()},1500);
 setInterval(()=>{if(signedIn()&&document.visibilityState==="visible")pullSoon()},20000);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")pullSoon()});
@@ -424,10 +430,11 @@ function editTask(id){const isNew=!id,t=isNew?{id:"",phase:phases()[0]||"",name:
  <label>Dependencies (comma-separated IDs)</label><input name="deps" value="${esc((t.deps||[]).join(", "))}"${ro}>
  <label><input type="checkbox" name="critical" ${t.critical?"checked":""} style="width:auto"${ro}> Critical path</label>
  ${blockers(t).length?`<p class="warn">⚠ Waiting on: ${blockers(t).map(d=>d+" ("+task(d).status+")").join(", ")}</p>`:""}
+ ${isNew?"":`<h4>To-dos for this task</h4>${todosFor(t.id).length?`<ul class="evl">${todosFor(t.id).map(x=>`<li><span class="dchip">${x.done?"✓ done":x.due?fmt(x.due):"open"}</span><span>${esc(x.text)} <span class="mut small">· ${esc(x.owner)}</span></span></li>`).join("")}</ul>`:'<p class="mut small">No to-dos linked yet.</p>'}${signedIn()?`<p><button type="button" class="small" id="tk-add">+ Add a to-do for ${esc(t.id)}</button></p>`:""}`}
  <h4>Notes / comments</h4><div>${(t.notes||[]).map(n=>`<div class="small"><b>${esc(n.who)}</b> <span class="mut">${new Date(n.at).toLocaleString("en-GB")}</span><br>${esc(n.text)}</div>`).join("<hr>")||'<p class="mut small">No notes yet</p>'}</div>
  <label>Add note</label><textarea name="note" rows="2"></textarea>
  <p style="display:flex;gap:.5rem;justify-content:flex-end"><button value="cancel" formnovalidate>Cancel</button><button class="pri" value="ok">${AD||ED?"Save":"Add note"}</button></p>`;
- const dlg=$("#dlg");dlg.showModal();
+ const dlg=$("#dlg");dlg.showModal();if($("#tk-add"))$("#tk-add").onclick=()=>{dlg.returnValue="cancel";dlg.close();ui.todoTask=t.id;view="todo";render();scrollTo(0,0);setTimeout(()=>{const i=$("#tdt");if(i)i.focus()},50)};
  dlg.onclose=()=>{if(dlg.returnValue!=="ok")return;const fd=new FormData(f),nid=(fd.get("id")||"").trim();
   if(isNew&&(!nid||task(nid))){alert("ID missing or already used");return}
   let n={...t,id:nid,name:fd.get("name"),phase:fd.get("phase"),owner:fd.get("owner"),start:fd.get("start"),due:fd.get("due"),status:fd.get("status"),progress:+fd.get("progress")||0,deps:String(fd.get("deps")).split(/[,\s]+/).filter(Boolean),critical:!!fd.get("critical")};
@@ -458,11 +465,11 @@ A.gantt=bindEdit;
 /* ---------- Calendar ---------- */
 R.calendar=()=>{const m=ui.calM||new Date(Math.max(today(),D(S.tasks.map(t=>t.due).sort()[0]||iso(today()))));m.setDate(1);ui.calM=m;
  const first=new Date(m);first.setDate(1-((m.getDay()+6)%7));let cells="";
- for(let i=0;i<42;i++){const d=new Date(first);d.setDate(first.getDate()+i);const ds=iso(d),ts=S.tasks.filter(t=>t.due===ds&&(!ui.mine||t.owner===me()));
+ for(let i=0;i<42;i++){const d=new Date(first);d.setDate(first.getDate()+i);const ds=iso(d),ts=S.tasks.filter(t=>t.due===ds&&(!ui.mine||t.owner===me())),tds=(S.todos||[]).filter(x=>!x.done&&(x.due===ds||(x.remind&&iso(new Date(x.remind))===ds))&&(!ui.mine||x.owner===me()));
   const ev=[ds===S.project.opening?'<div class="chip st-Done">Grand opening</div>':"",ds===S.project.softLaunch?'<div class="chip">Soft launch</div>':""].join("");
-  cells+=`<div class="${d.getMonth()!==m.getMonth()?"oth":""} ${ds===iso(today())?"today":""}"><b>${d.getDate()}</b>${ev}${ts.map(t=>`<div><a href="#" data-edit="${t.id}" class="${overdue(t)?"bad":""}">${t.critical?"● ":""}${t.id}</a> ${esc(t.name.slice(0,22))}</div>`).join("")}</div>`}
+  cells+=`<div class="${d.getMonth()!==m.getMonth()?"oth":""} ${ds===iso(today())?"today":""}"><b>${d.getDate()}</b>${ev}${ts.map(t=>`<div><a href="#" data-edit="${t.id}" class="${overdue(t)?"bad":""}">${t.critical?"● ":""}${t.id}</a> ${esc(t.name.slice(0,22))}</div>`).join("")}${tds.map(x=>`<div class="caltd">☑ ${esc(x.text.slice(0,24))}${x.owner!==me()?` <span class="mut">(${esc(x.owner)})</span>`:""}</div>`).join("")}</div>`}
  return `<h2>Calendar – ${m.toLocaleDateString("en-GB",{month:"long",year:"numeric"})}</h2><div class="filters"><button id="cp">◀ Prev</button><button id="ct">Today</button><button id="cn">Next ▶</button><label class="small" style="margin:0;align-self:center"><input type="checkbox" id="fm"${ui.mine?" checked":""}> My tasks only</label></div>
- <div class="cal">${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>`<div class="hd">${d}</div>`).join("")}${cells}</div><p class="small mut">Shows task due dates. ● = critical path.</p>`};
+ <div class="cal">${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>`<div class="hd">${d}</div>`).join("")}${cells}</div><p class="small mut">Shows task due dates and to-dos (☑). ● = critical path.</p>`};
 A.calendar=()=>{const mv=n=>{const d=new Date(ui.calM);d.setMonth(d.getMonth()+n);ui.calM=d;render()};$("#cp").onclick=()=>mv(-1);$("#cn").onclick=()=>mv(1);$("#ct").onclick=()=>{ui.calM=today();render()};$("#fm").onchange=e=>{ui.mine=e.target.checked;render()};bindEdit()};
 /* ---------- Team ---------- */
 R.team=()=>{const m=me();
@@ -492,7 +499,7 @@ R.reference=()=>{const b=S.brand;const cats=[...new Set(S.menu.map(m=>m.category
  <div class="card"><h3>Brand proposals <span class="chip">PROPOSALS – no decision made</span></h3><p class="small">${esc(b.note)}</p><table>${b.names.map(n=>`<tr><td><b>${esc(n[0])}</b></td><td class="small">${esc(n[1])}</td></tr>`).join("")}</table><div class="grid" style="margin-top:1rem">${b.styles.map(s=>`<div><b>${esc(s.name)}</b><div>${s.palette.map(c=>`<span class="sw" style="background:${esc(c)}" title="${esc(c)}"></span>`).join(" ")}</div><div class="small">${esc(s.palette.join(" · "))}</div><div class="small">Type: ${esc(s.type)}</div><div class="small mut">Tone: ${esc(s.tone)}</div></div>`).join("")}</div></div>`};
 A.reference=()=>document.querySelectorAll("[data-mp]").forEach(el=>el.onblur=()=>{const m=S.menu[+el.dataset.mp],v=el.textContent.trim();if(v!==m.price){const o=m.price;m.price=v;log(`Menu price ${m.item}: ${o} → ${v}`)}});
 /* ---------- Save changes button (saving is automatic; this shows the state and saves immediately) ---------- */
-function unsaved(){if(!signedIn()||!sync.base)return 0;let n=0;try{const cur=flat(S);for(const [k,x] of Object.entries(cur))if(!k.startsWith("activity|")&&sync.base[k]!==x.j)n++;for(const k of Object.keys(sync.base))if(!k.startsWith("activity|")&&!cur[k])n++}catch(e){}return n}
+function unsaved(){if(!signedIn()||!sync.base)return 0;let n=0;try{const cur=flat(S);for(const [k,x] of Object.entries(cur))if(!k.startsWith("activity|")&&sync.base[k]!==x.j)n++;for(const k of Object.keys(sync.base)){const c=k.split("|")[0];if(c!=="activity"&&(c==="_doc"||COLLS.includes(c))&&!cur[k])n++}}catch(e){}return n}
 let typing=false;
 function paintSave(){const b=$("#savebtn");if(!b)return;if(!signedIn()){b.style.display="none";return}b.style.display="";
  const n=unsaved();b.classList.remove("pri","ok");b.disabled=false;
@@ -704,36 +711,62 @@ function phoneTasks(){const f=ui.f,ts=filtered();
 function bindPhoneTasks(){const f=ui.f;$("#pq").oninput=e=>{f.q=e.target.value;const p=e.target.selectionStart;render();const i=$("#pq");i.focus();try{i.setSelectionRange(p,p)}catch(x){}};
  $("#ps").onchange=e=>{f.status=e.target.value;render()};$("#po").onchange=e=>{f.owner=e.target.value;render()};if($("#padd"))$("#padd").onclick=()=>editTask(null);
  bindEdit();document.querySelectorAll("[data-qs]").forEach(b=>b.onclick=()=>setField(b.dataset.qs,"status",b.dataset.v))}
+/* ---------- Keep every open copy on the latest version ---------- */
+let updatePending=false;
+function checkVersion(v){if(!v||v===APP_VER||updatePending)return;updatePending=true;
+ const go=()=>{if(busy()||unsaved()||sync.pushing){setTimeout(go,3000);return}location.reload()};
+ toast("Updating Project Norwood to the latest version…");setTimeout(go,2500)}
+/* ---------- In-app pop-ups: reminders, new to-dos assigned to you ---------- */
+const seenKey=()=>KEY+".seen."+me();
+function popup(title,body,actions){let d=$("#pop");if(!d){d=document.createElement("div");d.id="pop";d.setAttribute("role","alertdialog");d.setAttribute("aria-live","assertive");document.body.appendChild(d)}
+ d.innerHTML=`<div class="pop-t">${esc(title)}</div><div class="pop-b">${esc(body)}</div><div class="pop-a">${(actions||[]).map((a,i)=>`<button data-pa="${i}" class="${i===0?"pri":""}">${esc(a[0])}</button>`).join("")}<button data-pa="x">Close</button></div>`;
+ d.className="show";d.querySelectorAll("[data-pa]").forEach(b=>b.onclick=()=>{d.className="";const a=(actions||[])[+b.dataset.pa];if(a)a[1]()});
+ try{if(navigator.vibrate)navigator.vibrate([120,60,120])}catch(e){}
+ try{if(document.visibilityState!=="visible"&&"Notification" in window&&Notification.permission==="granted")navigator.serviceWorker.getRegistration().then(r=>r&&r.showNotification(title,{body,tag:"nhq-"+title,icon:"icon-192.png"}))}catch(e){}}
+function checkTodoEvents(){if(!signedIn())return;const m=me(),now=Date.now();let seen={};try{seen=JSON.parse(localStorage.getItem(seenKey())||"{}")}catch(e){}
+ const first=!seen._init;let changed=first;seen._init=1;
+ for(const x of (S.todos||[])){if(x.owner!==m||x.done)continue;
+  const ak="a:"+x._k;if(!seen[ak]){seen[ak]=1;changed=true;if(!first&&x.by&&x.by!==m){popup("New to-do from "+x.by,x.text+(x.due?" – due "+fmt(x.due):""),[["Open To-do",()=>{view="todo";render()}]]);break}}
+  if(x.remind){const t=new Date(x.remind).getTime(),rk="r:"+x._k+":"+x.remind;if(t<=now&&t>now-6*36e5&&!seen[rk]){seen[rk]=1;changed=true;
+   popup("⏰ Reminder",x.text+(x.due?" – due "+fmt(x.due):""),[["✓ Done",()=>{x.done=true;x.doneAt=new Date().toISOString();log("To-do done: "+x.text);render()}],["Snooze 10 min",()=>{x.remind=new Date(Date.now()+6e5).toISOString();log("Reminder snoozed: "+x.text);render()}]]);break}}}
+ if(changed)try{localStorage.setItem(seenKey(),JSON.stringify(seen))}catch(e){}}
+setInterval(checkTodoEvents,20000);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")setTimeout(checkTodoEvents,1500)});
+/* ---------- To-dos linked to tasks ---------- */
+const todosFor=id=>(S.todos||[]).filter(x=>x.task===id);
+const taskOpts=v=>`<option value="">— none —</option>`+S.tasks.map(t=>`<option value="${esc(t.id)}"${t.id===v?" selected":""}>${esc(t.id)} · ${esc(t.name.slice(0,48))}</option>`).join("");
 /* ---------- To-do list, reminders and personal calendar feed ---------- */
 const fmtWhen=r=>r?new Date(r).toLocaleString("en-GB",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"";
 const toLocalInput=r=>{if(!r)return"";const d=new Date(r);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)};
 function bindTodoChecks(){document.querySelectorAll("[data-td]").forEach(c=>c.onchange=()=>{const x=(S.todos||[]).find(y=>y._k===c.dataset.td);if(!x)return;x.done=c.checked;x.doneAt=c.checked?new Date().toISOString():"";log((c.checked?"To-do done: ":"To-do reopened: ")+x.text);render()})}
 function todoRow(x){const m=me(),can=isAdmin()||x.owner===m,od=!x.done&&x.due&&D(x.due)<today();
- return `<li class="work todo${x.done?" done":""}"><label class="tchk"><input type="checkbox" data-td="${esc(x._k)}"${x.done?" checked":""}${can?"":" disabled"} aria-label="Mark “${esc(x.text)}” done"><span><b>${esc(x.text)}</b><div class="small mut">${x.owner!==m?"<b>"+esc(x.owner)+"</b> · ":""}${x.due?(od?`<span class="bad">overdue · due ${fmt(x.due)}</span>`:"due "+fmt(x.due)):"no due date"}${x.remind?` · ⏰ ${fmtWhen(x.remind)}`:""}${x.by&&x.by!==x.owner?" · from "+esc(x.by):""}${x.notes?" · "+esc(x.notes):""}</div></span></label><div class="qbtns">${can?`<button class="small" data-tde="${esc(x._k)}">Edit</button>`:""}${isAdmin()?`<button class="small del" data-tdx="${esc(x._k)}">Delete</button>`:""}</div></li>`}
+ return `<li class="work todo${x.done?" done":""}"><label class="tchk"><input type="checkbox" data-td="${esc(x._k)}"${x.done?" checked":""}${can?"":" disabled"} aria-label="Mark “${esc(x.text)}” done"><span><b>${esc(x.text)}</b><div class="small mut">${x.owner!==m?"<b>"+esc(x.owner)+"</b> · ":""}${x.due?(od?`<span class="bad">overdue · due ${fmt(x.due)}</span>`:"due "+fmt(x.due)):"no due date"}${x.remind?` · ⏰ ${fmtWhen(x.remind)}`:""}${x.by&&x.by!==x.owner?" · from "+esc(x.by):""}${x.task&&task(x.task)?` · <a href="#" data-edit="${esc(x.task)}">↳ ${esc(x.task)}</a>`:""}${x.notes?" · "+esc(x.notes):""}</div></span></label><div class="qbtns">${can?`<button class="small" data-tde="${esc(x._k)}">Edit</button>`:""}${isAdmin()?`<button class="small del" data-tdx="${esc(x._k)}">Delete</button>`:""}</div></li>`}
 R.todo=()=>{if(!signedIn())return `<h2>To-do</h2><div class="card"><p>Sign in to see and add to-dos.</p><button class="pri" id="tsi">Sign in</button></div>`;
  const td=S.todos||[],m=me(),sortT=a=>[...a].sort((x,y)=>(x.done-y.done)||String(x.due||"9").localeCompare(String(y.due||"9")));
  const mine=td.filter(x=>x.owner===m),team=td.filter(x=>x.owner!==m),open=mine.filter(x=>!x.done).length;
  const list=(a,e)=>a.length?`<ul class="worklist">${sortT(a).map(todoRow).join("")}</ul>`:`<p class="mut small">${e}</p>`;
  return `<h2>To-do</h2><p class="small mut">Quick jobs and reminders. Set a reminder time and your phone gets a notification then – even with the app closed (turn on 🔔 first). You're also reminded the day before anything is due.</p>
  <form class="card todoadd" id="tdf" autocomplete="off"><input id="tdt" required placeholder="What needs doing?" aria-label="New to-do" enterkeyhint="done">
- <div class="filters">${isAdmin()?`<label class="small">For<select id="tdo">${teamNames().map(n=>`<option${n===m?" selected":""}>${esc(n)}</option>`).join("")}</select></label>`:""}<label class="small">Due date<input type="date" id="tdd"></label><label class="small">Remind me at<input type="datetime-local" id="tdr"></label><button class="pri">+ Add</button></div></form>
+ <div class="filters">${isAdmin()?`<label class="small">For<select id="tdo">${teamNames().map(n=>`<option${n===m?" selected":""}>${esc(n)}</option>`).join("")}</select></label>`:""}<label class="small">Due date<input type="date" id="tdd"></label><label class="small">Remind me at<input type="datetime-local" id="tdr"></label><label class="small tlink">Linked task (optional)<select id="tdk">${taskOpts(ui.todoTask||"")}</select></label><button class="pri">+ Add</button></div></form>
  <div class="card"><h3>My to-dos <span class="small mut">${open} open</span></h3>${list(mine,"Nothing on your list.")}</div>
  <div class="card"><h3>Team to-dos</h3>${list(team,"Nothing for the rest of the team.")}</div>${calCard()}`};
 A.todo=()=>{if($("#tsi"))$("#tsi").onclick=()=>showLogin();const f=$("#tdf");if(!f)return;
- f.onsubmit=e=>{e.preventDefault();const text=$("#tdt").value.trim();if(!text)return;const owner=$("#tdo")?$("#tdo").value:me(),due=$("#tdd").value,r=$("#tdr").value;
-  S.todos=S.todos||[];S.todos.push({id:"D"+Date.now().toString(36),text,owner,by:me(),due,remind:r?new Date(r).toISOString():"",done:false,notes:"",at:new Date().toISOString()});
+ f.onsubmit=e=>{e.preventDefault();const text=$("#tdt").value.trim();if(!text)return;const owner=$("#tdo")?$("#tdo").value:me(),due=$("#tdd").value,r=$("#tdr").value,tk=$("#tdk")?$("#tdk").value:"";ui.todoTask="";
+  S.todos=S.todos||[];S.todos.push({id:"D"+Date.now().toString(36),text,owner,by:me(),due,remind:r?new Date(r).toISOString():"",task:tk,done:false,notes:"",at:new Date().toISOString()});
   log(owner===me()?`To-do added: ${text}${due?" (due "+fmt(due)+")":""}`:`New to-do for ${owner}: ${text}${due?" (due "+fmt(due)+")":""}`);render();
   toast(r&&notifState()!=="on"?"Added. Turn on 🔔 notifications so the reminder reaches your phone.":"Added.")};
- bindTodoChecks();
+ bindTodoChecks();bindEdit();
  document.querySelectorAll("[data-tde]").forEach(b=>b.onclick=()=>todoEdit((S.todos||[]).find(y=>y._k===b.dataset.tde)));
  document.querySelectorAll("[data-tdx]").forEach(b=>b.onclick=()=>{const x=(S.todos||[]).find(y=>y._k===b.dataset.tdx);if(x&&confirm("Delete “"+x.text+"”?")){S.todos=S.todos.filter(y=>y!==x);log("Deleted to-do: "+x.text);render()}});
  bindCal()};
 function todoEdit(x){if(!x)return;const f=$("#dlgf"),ad=isAdmin();
- f.innerHTML=`<h3>Edit to-do</h3><label>To-do<input name="text" value="${esc(x.text)}" required></label>${ad?`<label>For<select name="owner">${teamNames().map(n=>`<option${n===x.owner?" selected":""}>${esc(n)}</option>`).join("")}</select></label>`:""}<label>Due date<input type="date" name="due" value="${esc(x.due||"")}"></label><label>Remind me at<input type="datetime-local" name="remind" value="${toLocalInput(x.remind)}"></label><label>Notes<textarea name="notes" rows="3">${esc(x.notes||"")}</textarea></label><p style="display:flex;gap:.5rem;justify-content:flex-end"><button value="cancel" formnovalidate>Cancel</button><button class="pri" value="ok">Save</button></p>`;
- const d=$("#dlg");d.returnValue="";d.showModal();d.onclose=()=>{if(d.returnValue!=="ok")return;const fd=new FormData(f);x.text=String(fd.get("text")||"").trim()||x.text;if(ad&&fd.get("owner"))x.owner=fd.get("owner");x.due=fd.get("due")||"";const r=fd.get("remind");x.remind=r?new Date(r).toISOString():"";x.notes=String(fd.get("notes")||"");log("To-do updated: "+x.text);render()}}
+ f.innerHTML=`<h3>Edit to-do</h3><label>To-do<input name="text" value="${esc(x.text)}" required></label>${ad?`<label>For<select name="owner">${teamNames().map(n=>`<option${n===x.owner?" selected":""}>${esc(n)}</option>`).join("")}</select></label>`:""}<label>Due date<input type="date" name="due" value="${esc(x.due||"")}"></label><label>Remind me at<input type="datetime-local" name="remind" value="${toLocalInput(x.remind)}"></label><label>Linked task<select name="task">${taskOpts(x.task||"")}</select></label><label>Notes<textarea name="notes" rows="3">${esc(x.notes||"")}</textarea></label><p style="display:flex;gap:.5rem;justify-content:flex-end"><button value="cancel" formnovalidate>Cancel</button><button class="pri" value="ok">Save</button></p>`;
+ const d=$("#dlg");d.returnValue="";d.showModal();d.onclose=()=>{if(d.returnValue!=="ok")return;const fd=new FormData(f);x.text=String(fd.get("text")||"").trim()||x.text;if(ad&&fd.get("owner"))x.owner=fd.get("owner");x.due=fd.get("due")||"";const r=fd.get("remind");x.remind=r?new Date(r).toISOString():"";x.task=String(fd.get("task")||"");x.notes=String(fd.get("notes")||"");log("To-do updated: "+x.text);render()}}
 function calCard(){const l=ui.calLink;return `<div class="card"><h3>📅 My calendar</h3><p class="small">Put your tasks, to-dos and reminders into your phone's own calendar, with alerts. It keeps itself up to date as the plan changes.</p>${l?`<div class="calbtns"><a class="btn pri" href="${esc(l.replace(/^https?:/,"webcal:"))}">iPhone / Mac Calendar</a><a class="btn" target="_blank" rel="noopener" href="https://calendar.google.com/calendar/r?cid=${encodeURIComponent(l.replace(/^https?:/,"webcal:"))}">Google Calendar (Android)</a><button id="calcopy">Copy link for Outlook</button></div><p class="small mut">This link is private to you – please don't share it. iPhone checks for changes roughly every 30–60 minutes; Google can take a few hours.</p>`:`<button class="pri" id="calget">Get my calendar link</button>`}</div>`}
 function bindCal(){if($("#calget"))$("#calget").onclick=async()=>{try{const j=await call("hq_cal_link");ui.calLink=SB.url+"/functions/v1/hq-cal?u="+j.token;render()}catch(e){toast("Couldn't get your calendar link: "+e.message)}};
  if($("#calcopy"))$("#calcopy").onclick=async()=>{try{await navigator.clipboard.writeText(ui.calLink);toast("Calendar link copied – paste it into Outlook › Add calendar › Subscribe from web.")}catch(e){prompt("Copy this link:",ui.calLink)}}}
+function myTodosCard(){const mt=(S.todos||[]).filter(x=>x.owner===me()&&!x.done).sort((a,b)=>String(a.due||"9").localeCompare(String(b.due||"9")));
+ return `<div class="card"><h3>☑ My to-dos <span class="small mut">${mt.length} open</span></h3>${mt.length?`<ul class="worklist">${mt.map(todoRow).join("")}</ul>`:'<p class="mut small">Nothing on your to-do list.</p>'}<button data-go="todo">Open To-do</button></div>`}
 /* ---------- Home tiles: Coming up + Project progress graphic ---------- */
 function homeTiles(){const t0=today(),m=me(),in14=new Date(t0);in14.setDate(in14.getDate()+14);const ev=[];
  S.tasks.forEach(t=>{if(t.status==="Done")return;if(t.due&&D(t.due)>=t0&&D(t.due)<=in14)ev.push([t.due,t.id+" due",t.name,t.id,t.owner]);if(t.start&&t.status==="Not started"&&D(t.start)>=t0&&D(t.start)<=in14)ev.push([t.start,t.id+" starts",t.name,t.id,t.owner])});
@@ -770,7 +803,7 @@ A.more=()=>{bindSeg();((ui.more||"reference")==="data"?A.data:A.reference)()};
 /* ---------- My work: one simple page per person ---------- */
 function quick(t){if(!canTask(t))return "";const b=(s,l,c)=>t.status===s?"":`<button class="small ${c||""}" data-qs="${t.id}" data-v="${s}">${l}</button>`;
  return `${b("In progress","▶ Start")}${b("Done","✓ Done","pri")}${b("Blocked","⚠ Blocked")}`}
-function workRow(t){return `<li class="work"><div><a href="#" data-edit="${t.id}"><b>${t.id}</b> ${esc(t.name)}</a><div class="small mut">${t.owner!==me()?"<b>"+esc(t.owner)+"</b> · ":""}${esc(t.phase)} · due ${fmt(t.due)} ${overdue(t)?`<span class="bad">overdue ${Math.ceil((today()-D(t.due))/864e5)} day${Math.ceil((today()-D(t.due))/864e5)===1?"":"s"}</span>`:t.status!=="Done"?`<span>(${Math.max(0,Math.round((D(t.due)-today())/864e5))} days left)</span>`:""} · <span class="chip st-${t.status.replace(" ","")}">${t.status}</span>${t.critical?' <span class="chip crit">critical</span>':""}${blockers(t).length?` <span class="warn">waits on ${blockers(t).join(", ")}</span>`:""}</div></div><div class="qbtns">${quick(t)}<button class="small" data-edit="${t.id}">+ Note</button></div></li>`}
+function workRow(t){return `<li class="work"><div><a href="#" data-edit="${t.id}"><b>${t.id}</b> ${esc(t.name)}</a><div class="small mut">${t.owner!==me()?"<b>"+esc(t.owner)+"</b> · ":""}${esc(t.phase)} · due ${fmt(t.due)} ${overdue(t)?`<span class="bad">overdue ${Math.ceil((today()-D(t.due))/864e5)} day${Math.ceil((today()-D(t.due))/864e5)===1?"":"s"}</span>`:t.status!=="Done"?`<span>(${Math.max(0,Math.round((D(t.due)-today())/864e5))} days left)</span>`:""} · <span class="chip st-${t.status.replace(" ","")}">${t.status}</span>${t.critical?' <span class="chip crit">critical</span>':""}${blockers(t).length?` <span class="warn">waits on ${blockers(t).join(", ")}</span>`:""}${todosFor(t.id).length?` <span class="chip">☑ ${todosFor(t.id).filter(x=>x.done).length}/${todosFor(t.id).length} to-dos</span>`:""}</div></div><div class="qbtns">${quick(t)}<button class="small" data-edit="${t.id}">+ Note</button></div></li>`}
 R.mine=()=>{if(!signedIn())return `<h2>My work</h2><div class="card"><p>Sign in to see the tasks, risks and actions assigned to you.</p><button class="pri" id="msi">Sign in</button></div>`;
  const m=me(),t0=today(),in7=new Date(t0),in30=new Date(t0);in7.setDate(in7.getDate()+7);in30.setDate(in30.getDate()+30);
  const mine=S.tasks.filter(t=>t.owner===m&&t.status!=="Done").sort((a,b)=>a.due.localeCompare(b.due));
@@ -783,11 +816,12 @@ R.mine=()=>{if(!signedIn())return `<h2>My work</h2><div class="card"><p>Sign in 
  <div class="card tile" data-drill="mine:now"><div class="mut">Needs you now</div><div class="big">${now.length}</div><div class="small mut">overdue, due this week or in progress</div></div>
  <div class="card"><div class="mut">Open risks & questions</div><div class="big">${myR.length+myQ.length}</div><div class="small mut"><a href="#" data-go="logs">Open Risks & decisions</a></div></div></div>
  ${strip("mine",S.tasks.filter(t=>t.owner===m))}
+ ${myTodosCard()}
  <div class="card"><h3>Now</h3>${list(now,"Nothing urgent – nice work.")}</div>
  <div class="card"><h3>Next 30 days</h3>${list(soon,"Nothing starting in the next 30 days.")}</div>
  ${later.length?`<details class="card"><summary><b>Later (${later.length})</b></summary>${list(later,"")}</details>`:""}
  ${myR.length||myQ.length||myG.length?`<div class="card"><h3>Also yours</h3><ul>${myR.map(r=>`<li class="small"><b>${esc(r.type)}</b> ${esc(r.item)} <span class="mut">· ${esc(r.status)}</span></li>`).join("")}${myQ.map(q=>`<li class="small"><b>Question</b> ${esc(q.question)} <span class="mut">· needed ${fmt(q.needed)}</span></li>`).join("")}${myG.map(g=>`<li class="small"><b>Franchise</b> ${esc(g.item)} <span class="mut">· ${esc(g.status)}</span></li>`).join("")}</ul></div>`:""}`};
-A.mine=()=>{bindDrill();bindEdit();if($("#msi"))$("#msi").onclick=()=>showLogin();document.querySelectorAll("[data-go]").forEach(b=>b.onclick=e=>{e.preventDefault();view=b.dataset.go;render()});
+A.mine=()=>{bindDrill();bindEdit();bindTodoChecks();if($("#msi"))$("#msi").onclick=()=>showLogin();document.querySelectorAll("[data-go]").forEach(b=>b.onclick=e=>{e.preventDefault();view=b.dataset.go;render()});
  document.querySelectorAll("[data-qs]").forEach(b=>b.onclick=()=>setField(b.dataset.qs,"status",b.dataset.v))};
 /* ---------- Franchise growth: readiness tracker + unit economics ---------- */
 const GSTAT=["Not started","In progress","Done"];
