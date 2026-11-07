@@ -222,7 +222,7 @@ const me=()=>sync.name||"";
  copy, so the app still works offline and pushes queued changes when it reconnects. */
 const SB={url:"https://ufinmrgnqwutxwntcdvs.supabase.co",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmaW5tcmducXd1dHh3bnRjZHZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNTQ3NzQsImV4cCI6MjEwNjgzMDc3NH0.OH5ZXB5eUSDWsDdRcn63Vm0fGSbC-eCg-JgHY_2c4Uo"};
 if(window.NORWOOD_SB)Object.assign(SB,window.NORWOOD_SB);
-const APP_VER="2026-11-07f";
+const APP_VER="2026-11-07g";
 const COLLS=["team","tasks","raid","questions","menu","kpis","checklist","activity","brandboard","kb","growth","todos","budget","expenses","contacts","quotes"];
 const sync={pin:localStorage.getItem(KEY+".pin")||"",name:localStorage.getItem(KEY+".name")||"",role:localStorage.getItem(KEY+".role")||"",base:null,state:"off",peers:[],pushT:0,pullT:0,pushing:false,again:false,pendingPull:false,chan:null,err:""};
 /* ---------- Access rules (the server enforces the same rules; this only shapes the screen) ----------
@@ -850,6 +850,7 @@ const EXP_CATS=["Fit-out & building","Equipment & kit","Gas, electric & utilitie
 const METHODS=["Own money (counts towards my stake)","Company account","Cash from takings"];
 const money=n=>(+n<0?"−":"")+"£"+Math.abs(+n||0).toLocaleString("en-GB",{minimumFractionDigits:2,maximumFractionDigits:2});
 const fin=()=>Object.assign({reserve:0,stakes:{}},S.finance||{});
+const partners=()=>{const f=fin();return Array.isArray(f.partners)?teamNames().filter(n=>f.partners.includes(n)):teamNames().filter(n=>n!=="Malik")};
 const isSpend=e=>e.kind!=="Cash paid in";
 function moneyTotals(){const B=S.budget||[],E=(S.expenses||[]).filter(isSpend),f=fin(),forecast=B.reduce((a,b)=>a+(+b.forecast||0),0),reserve=+f.reserve||0,spent=E.reduce((a,e)=>a+(+e.amount||0),0);
  return {forecast,reserve,total:forecast+reserve,spent,left:forecast+reserve-spent,reserveUsed:Math.max(0,spent-forecast),
@@ -876,7 +877,7 @@ R.money=()=>{const sub=ui.money||"overview",t=moneyTotals(),f=fin(),B=S.budget||
   <div class="card"><h3>Budget reserve</h3><p>${money(f.reserve)} held back for overruns. ${t.reserveUsed>0?`<b class="${t.reserveUsed>t.reserve?"bad":"warn"}">${money(t.reserveUsed)} used</b>`:"Untouched so far."}</p>${mbar(t.reserveUsed,t.reserve,"warnbar")}${isAdmin()?'<p><button id="fset">Set reserve and stakes</button></p>':""}</div>`}
  // overview
  const cats=EXP_CATS.map(c=>[c,B.filter(b=>b.category===c).reduce((a,b)=>a+(+b.forecast||0),0),E.filter(e=>isSpend(e)&&e.category===c).reduce((a,e)=>a+(+e.amount||0),0)]).filter(x=>x[1]||x[2]);
- const people=teamNames(),stakeTotal=people.reduce((a,n)=>a+(+f.stakes[n]||0),0);
+ const people=partners(),stakeTotal=people.reduce((a,n)=>a+(+f.stakes[n]||0),0);
  return head+`<div class="grid"><div class="card hero"><div class="mut">Total budget</div><div class="big">${money(t.total)}</div><div class="small mut">${money(t.forecast)} forecast + ${money(t.reserve)} reserve</div></div>
  <div class="card"><div class="mut">Spent so far</div><div class="big">${money(t.spent)}</div>${mbar(t.spent,t.total,t.spent>t.total?"badbar":"")}<div class="small mut">${t.total?Math.round(t.spent/t.total*100):0}% of budget</div></div>
  <div class="card"><div class="mut">Left to spend</div><div class="big ${t.left<0?"bad":""}">${money(t.left)}</div><div class="small ${t.reserveUsed>0?"warn":"mut"}">${t.reserveUsed>0?money(t.reserveUsed)+" of the reserve used":"Reserve untouched"}</div></div></div>
@@ -917,10 +918,10 @@ function lineDialog(b){if(!isAdmin())return;const isNew=!b;b=b?clone(b):{categor
   if(d.returnValue!=="ok")return;const fd=new FormData(f);b.item=String(fd.get("item")||"").trim();b.task=fd.get("task")||"";b.category=fd.get("category");b.forecast=Math.round((+fd.get("forecast")||0)*100)/100;b.notes=String(fd.get("notes")||"");
   S.budget=S.budget||[];if(isNew){b.id="B"+Date.now().toString(36);S.budget.push(b);log(`Budget line added: ${b.item} ${money(b.forecast)}`)}else{const i=S.budget.findIndex(x=>x._k===b._k);if(i>=0)S.budget[i]=b;log(`Budget line updated: ${b.item} ${money(b.forecast)}`)}render()}}
 function finDialog(){if(!isAdmin())return;const fv=fin(),f=$("#dlgf");
- f.innerHTML=`<h3>Reserve and partner stakes</h3><label>Budget reserve (£)<input name="reserve" type="number" inputmode="decimal" step="0.01" min="0" value="${fv.reserve||""}"></label><h4>Committed stake per person (£)</h4>${teamNames().map(n=>`<label>${esc(n)}<input name="st_${esc(n)}" type="number" inputmode="decimal" step="0.01" min="0" value="${fv.stakes[n]||""}"></label>`).join("")}
+ f.innerHTML=`<h3>Reserve and partner stakes</h3><label>Budget reserve (£)<input name="reserve" type="number" inputmode="decimal" step="0.01" min="0" value="${fv.reserve||""}"></label><h4>Shareholders and committed stake (£)</h4><p class="small mut">Untick anyone who isn't investing (e.g. staff). They stay in the team but drop out of Partner stakes.</p>${teamNames().map(n=>{const on=partners().includes(n);return `<label><span style="display:flex;gap:.5rem;align-items:center"><input type="checkbox" name="pt_${esc(n)}" style="width:auto"${on?" checked":""}> ${esc(n)} is a shareholder</span><input name="st_${esc(n)}" type="number" inputmode="decimal" step="0.01" min="0" value="${fv.stakes[n]||""}" placeholder="Committed stake"></label>`}).join("")}
  <p style="display:flex;gap:.5rem;justify-content:flex-end"><button value="cancel" formnovalidate>Cancel</button><button class="pri" value="ok">Save</button></p>`;
- const d=$("#dlg");d.returnValue="";d.showModal();d.onclose=()=>{if(d.returnValue!=="ok")return;const fd=new FormData(f),st={};teamNames().forEach(n=>{const v=+fd.get("st_"+n)||0;if(v)st[n]=v});
-  S.finance={reserve:+fd.get("reserve")||0,stakes:st};log(`Budget reserve ${money(S.finance.reserve)}; stakes updated`);render()}}
+ const d=$("#dlg");d.returnValue="";d.showModal();d.onclose=()=>{if(d.returnValue!=="ok")return;const fd=new FormData(f),st={},pt=teamNames().filter(n=>fd.get("pt_"+n));pt.forEach(n=>{const v=+fd.get("st_"+n)||0;if(v)st[n]=v});
+  S.finance={reserve:+fd.get("reserve")||0,stakes:st,partners:pt};log(`Budget reserve ${money(S.finance.reserve)}; stakes updated`);render()}}
 A.money=()=>{bindSeg();bindEdit();bindQuotes();document.querySelectorAll("[data-elog]").forEach(b=>b.onclick=()=>expDialog(null));
  document.querySelectorAll("[data-ee]").forEach(b=>b.onclick=()=>expDialog((S.expenses||[]).find(x=>x._k===b.dataset.ee)));
  document.querySelectorAll("[data-ea]").forEach(b=>b.onclick=()=>{const e=(S.expenses||[]).find(x=>x._k===b.dataset.ea);if(e){e.status="Approved";log(`Expense approved: ${money(e.amount)} – ${e.desc} (${e.paidBy})`);render()}});
