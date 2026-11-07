@@ -220,7 +220,7 @@ const me=()=>sync.name||"";
  copy, so the app still works offline and pushes queued changes when it reconnects. */
 const SB={url:"https://ufinmrgnqwutxwntcdvs.supabase.co",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmaW5tcmducXd1dHh3bnRjZHZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNTQ3NzQsImV4cCI6MjEwNjgzMDc3NH0.OH5ZXB5eUSDWsDdRcn63Vm0fGSbC-eCg-JgHY_2c4Uo"};
 if(window.NORWOOD_SB)Object.assign(SB,window.NORWOOD_SB);
-const APP_VER="2026-11-07d";
+const APP_VER="2026-11-07e";
 const COLLS=["team","tasks","raid","questions","menu","kpis","checklist","activity","brandboard","kb","growth","todos","budget","expenses"];
 const sync={pin:localStorage.getItem(KEY+".pin")||"",name:localStorage.getItem(KEY+".name")||"",role:localStorage.getItem(KEY+".role")||"",base:null,state:"off",peers:[],pushT:0,pullT:0,pushing:false,again:false,pendingPull:false,chan:null,err:""};
 /* ---------- Access rules (the server enforces the same rules; this only shapes the screen) ----------
@@ -723,9 +723,22 @@ function bindPhoneTasks(){const f=ui.f;$("#pq").oninput=e=>{f.q=e.target.value;c
  bindEdit();document.querySelectorAll("[data-qs]").forEach(b=>b.onclick=()=>setField(b.dataset.qs,"status",b.dataset.v))}
 /* ---------- Keep every open copy on the latest version ---------- */
 let updatePending=false;
-function checkVersion(v){if(!v||v<=APP_VER||updatePending)return;updatePending=true;
- const go=()=>{if(busy()||unsaved()||sync.pushing){setTimeout(go,3000);return}location.reload()};
- toast("Updating Project Norwood to the latest version…");setTimeout(go,2500)}
+/* Loads the newest version automatically: checked when the app opens, whenever it comes back on screen,
+   and every 2 minutes. version.json is published with every update and never cached. */
+function applyUpdate(v){if(updatePending)return;let tried="";try{tried=sessionStorage.getItem(KEY+".triedVer")||""}catch(e){}
+ if(tried===v){updatePending=true;popup("Update available","A newer version of Project Norwood is ready.",[["Update now",()=>{location.replace(location.pathname+"?v="+encodeURIComponent(v)+"&r="+Date.now())}]]);return}
+ updatePending=true;const go=()=>{if(busy()||unsaved()||sync.pushing){setTimeout(go,1500);return}
+ try{sessionStorage.setItem(KEY+".updatedTo",v);sessionStorage.setItem(KEY+".triedVer",v)}catch(e){}location.replace(location.pathname+"?v="+encodeURIComponent(v)+location.hash)};
+ if(busy()||unsaved())toast("A new version is ready – it will load as soon as your change is saved.");go()}
+function checkVersion(v){if(v&&v>APP_VER)applyUpdate(v)}
+let verChecking=false;
+async function checkForUpdate(){if(verChecking||updatePending)return;verChecking=true;
+ try{const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});if(r.ok){const j=await r.json();checkVersion(j.version)}}catch(e){}finally{verChecking=false}}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkForUpdate()});
+window.addEventListener("pageshow",()=>checkForUpdate());window.addEventListener("focus",()=>checkForUpdate());window.addEventListener("online",()=>checkForUpdate());
+setInterval(()=>{if(document.visibilityState==="visible")checkForUpdate()},120000);
+checkForUpdate();
+try{if(/[?&]v=/.test(location.search)){history.replaceState(null,"",location.pathname+location.hash);const u=sessionStorage.getItem(KEY+".updatedTo");if(u){sessionStorage.removeItem(KEY+".updatedTo");if(APP_VER>=u){sessionStorage.removeItem(KEY+".triedVer");setTimeout(()=>toast("Updated to the latest version."),800)}}}}catch(e){}
 /* ---------- In-app pop-ups: reminders, new to-dos assigned to you ---------- */
 const seenKey=()=>KEY+".seen."+me();
 function popup(title,body,actions){let d=$("#pop");if(!d){d=document.createElement("div");d.id="pop";d.setAttribute("role","alertdialog");d.setAttribute("aria-live","assertive");document.body.appendChild(d)}
