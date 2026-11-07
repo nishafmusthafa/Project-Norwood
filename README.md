@@ -113,6 +113,21 @@ Added once by the first Nishaf or Fanshad sign-in. It only adds items that don't
   - switch to Supabase Auth with personal email logins;
   - split the page into modules with a build step.
 
+## Expenses
+- **Overview:**
+  - total budget (forecast plus reserve), spent so far and left to spend;
+  - a breakdown by category (spent against forecast);
+  - **partner stakes:** each person's committed stake against what they've paid in, meaning their own money spent on the project plus cash paid into the business;
+  - the latest spending.
+- **Spending log:** everyone can **log an expense**: amount, what for, date, category, budget line, how it was paid and a receipt photo (taken with the phone camera).
+  - **Own money** counts towards that person's stake. **Company account** and **Cash from takings** don't.
+  - Members can edit their own entries until they're approved.
+  - Nishaf and Fanshad approve, delete and log for anyone.
+  - The log filters by person and category, and exports to CSV.
+- **Budget:** Nishaf and Fanshad add a forecast for each work item, linked to a plan task, and see forecast, spent and left for each line. **Add a line for every phase** creates lines from the plan phases.
+- **Budget reserve and stakes:** set with **Set reserve and stakes**. Home shows an alert when spending eats into the reserve or goes over budget.
+- On laptops, the less-used sections (Menu, Franchise, Knowledge, Team, More) sit under **☰ More** so the header stays on one line.
+
 ## To-do, reminders and calendars
 - **To-do tab:** add a to-do with an optional due date and **reminder time**. Nishaf and Fanshad can assign to-dos to anyone; everyone else adds their own. Owners tick them off; only Nishaf and Fanshad can delete.
 - **Push notifications:**

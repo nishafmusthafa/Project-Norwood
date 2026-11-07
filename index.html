@@ -52,6 +52,7 @@ h2,h3{letter-spacing:-.01em}h2{font-weight:800}
 nav button{font-weight:600;padding:.45rem .55rem;font-size:.93rem}nav button:hover{background:color-mix(in srgb,var(--acc) 10%,transparent)}nav button[aria-current=page],nav button[aria-current=page]:hover{background:var(--acc);color:#fff}
 header{gap:.4rem}header h1{margin-right:.5rem}#who .chip{font-size:.7rem}
 @media(max-width:1340px){#who .chip{display:none}}
+@media (min-width:761px) and (max-width:1560px){nav button[data-v=menuboard],nav button[data-v=growth],nav button[data-v=knowledge],nav button[data-v=team],nav button[data-v=more]{display:none}header nav button[data-menu]{display:inline-flex;gap:.3rem;align-items:center}header nav button[data-menu] .ico{display:inline}}
 @media(max-width:1420px){nav button{padding:.4rem .42rem;font-size:.9rem}header h1{font-size:1.1rem;margin-right:.25rem}#sync,#savebtn,#bell{padding-left:.5rem;padding-right:.5rem}}
 button.pri{box-shadow:0 2px 0 color-mix(in srgb,var(--acc) 60%,#000)}button.pri:active{transform:translateY(1px);box-shadow:none}
 .note{border-left-color:var(--hi)}
@@ -106,6 +107,8 @@ a{color:var(--acc);text-underline-offset:2px}a:hover{color:color-mix(in srgb,var
 #pop.show{transform:translate(-50%,0)}.pop-t{font-weight:800;font-size:1.05rem;color:var(--acc)}.pop-b{margin:.25rem 0 .7rem}.pop-a{display:flex;gap:.5rem;flex-wrap:wrap}.pop-a button{flex:1}
 .caltd{font-size:.75rem;color:var(--acc)}.tlink{flex-basis:100% !important}
 @media (prefers-reduced-motion:reduce){#pop{transition:none}}
+.mb2{display:block;height:9px;margin:.35rem 0}.badbar{background:#c62828 !important}.warnbar{background:#b26a00 !important}.okbar{background:#2e7d32 !important}
+.catrow{grid-template-columns:minmax(0,11rem) 1fr auto}.catrow .mb2{margin:0}
 .seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin:.25rem 0 1rem}.seg button{border:0;border-radius:0;background:var(--card);padding:.5rem 1rem;font-weight:600}.seg button[aria-pressed=true]{background:var(--acc);color:#fff}
 .worklist{list-style:none;padding:0;margin:0}.work{display:flex;gap:.75rem;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--line)}.work:last-child{border-bottom:0}.qbtns{display:flex;gap:.35rem;flex-wrap:wrap;justify-content:flex-end}
 details.card summary{cursor:pointer}
@@ -216,8 +219,8 @@ const me=()=>sync.name||"";
  copy, so the app still works offline and pushes queued changes when it reconnects. */
 const SB={url:"https://ufinmrgnqwutxwntcdvs.supabase.co",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmaW5tcmducXd1dHh3bnRjZHZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNTQ3NzQsImV4cCI6MjEwNjgzMDc3NH0.OH5ZXB5eUSDWsDdRcn63Vm0fGSbC-eCg-JgHY_2c4Uo"};
 if(window.NORWOOD_SB)Object.assign(SB,window.NORWOOD_SB);
-const APP_VER="2026-11-07b";
-const COLLS=["team","tasks","raid","questions","menu","kpis","checklist","activity","brandboard","kb","growth","todos"];
+const APP_VER="2026-11-07c";
+const COLLS=["team","tasks","raid","questions","menu","kpis","checklist","activity","brandboard","kb","growth","todos","budget","expenses"];
 const sync={pin:localStorage.getItem(KEY+".pin")||"",name:localStorage.getItem(KEY+".name")||"",role:localStorage.getItem(KEY+".role")||"",base:null,state:"off",peers:[],pushT:0,pullT:0,pushing:false,again:false,pendingPull:false,chan:null,err:""};
 /* ---------- Access rules (the server enforces the same rules; this only shapes the screen) ----------
  Nishaf, Fanshad: full access.  Everyone else: update status, progress, dates and notes on tasks they own,
@@ -325,7 +328,7 @@ async function init(){
  const raw=localStorage.getItem(KEY);
  if(raw){try{S=JSON.parse(raw)}catch(e){}}
  if(!S){try{const r=await fetch("./data.json",{cache:"no-store"});if(r.ok)S=await r.json()}catch(e){} if(!S)S=clone(SEED)}
- S.activity=S.activity||[];S.brandboard=S.brandboard||[];S.kb=S.kb||[];S.growth=S.growth||[];S.todos=S.todos||[];keyify(S,true);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+ S.activity=S.activity||[];S.brandboard=S.brandboard||[];S.kb=S.kb||[];S.growth=S.growth||[];S.todos=S.todos||[];S.budget=S.budget||[];S.expenses=S.expenses||[];keyify(S,true);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
  try{sync.base=JSON.parse(localStorage.getItem(KEY+".base")||"null")}catch(e){sync.base=null}
  if(localStorage.getItem(KEY+".theme")==="dark")document.documentElement.dataset.theme="dark";
  $("#theme").onclick=()=>{const d=document.documentElement.dataset.theme==="dark";document.documentElement.dataset.theme=d?"":"dark";localStorage.setItem(KEY+".theme",d?"light":"dark")};
@@ -333,15 +336,15 @@ async function init(){
  render();bindLogin();
  if(signedIn())connect();else{setSync("off");showLogin()}
 }
-const VIEWS={dashboard:"Home",mine:"My work",todo:"To-do",plan:"Plan",logs:"Risks",brand:"Brand",menuboard:"Menu",growth:"Franchise",knowledge:"Knowledge",team:"Team",more:"More"};
+const VIEWS={dashboard:"Home",mine:"My work",todo:"To-do",money:"Expenses",plan:"Plan",logs:"Risks",brand:"Brand",menuboard:"Menu",growth:"Franchise",knowledge:"Knowledge",team:"Team",more:"More"};
 if({tasks:1,gantt:1,calendar:1}[view])view="plan";if({reference:1,data:1}[view])view="more";
 function setHdr(){const h=document.querySelector("header");if(h&&getComputedStyle(h).position==="sticky")document.documentElement.style.setProperty("--hdr",h.offsetHeight+"px");else document.documentElement.style.setProperty("--hdr","0px")}
 window.addEventListener("resize",setHdr);
 function render(){
  applyTheme();setTimeout(setHdr,0);
- $("#nav").innerHTML=Object.entries(VIEWS).map(([k,v])=>`<button data-v="${k}"${k===view?' aria-current="page"':""}><span class="ico" aria-hidden="true">${ICON[k]||"•"}</span><span class="lbl">${v}</span></button>`).join("")+`<button data-menu aria-label="All sections"${PRIMARY.includes(view)?"":' aria-current="page"'}><span class="ico" aria-hidden="true">☰\uFE0E</span><span class="lbl">More</span></button>`;
+ $("#nav").innerHTML=Object.entries(VIEWS).map(([k,v])=>`<button data-v="${k}"${k===view?' aria-current="page"':""}><span class="ico" aria-hidden="true">${ICON[k]||"•"}</span><span class="lbl">${v}</span></button>`).join("")+`<button data-menu aria-label="All sections"><span class="ico" aria-hidden="true">☰\uFE0E</span><span class="lbl">More</span></button>`;
  $("#nav").querySelectorAll("button[data-v]").forEach(b=>b.onclick=()=>{view=b.dataset.v;localStorage.setItem(KEY+".view",view);render();scrollTo(0,0);$("#app").focus({preventScroll:true})});
- $("#nav").querySelector("[data-menu]").onclick=openSheet;
+ $("#nav").querySelector("[data-menu]").onclick=openSheet;markMenu();
  $("#app").innerHTML=(R[view]||R.dashboard)();(A[view]||(()=>{}))();
 }
 const R={},A={};
@@ -642,6 +645,7 @@ function alerts(){const t0=today(),out=[],days=Math.ceil((D(S.project.opening)-t
  S.questions.filter(q=>q.status==="Open"&&q.needed&&D(q.needed)<t0).forEach(q=>out.push([2,`Decision overdue: ${esc(q.question)} (needed ${fmt(q.needed)}) · ${esc(q.owner)}`]));
  const reg=task("T19");if(reg&&reg.status!=="Done"&&days<45)out.push([3,`Food business registration (T19) must be done 28+ days before opening – ${days} days to go`,"T19"]);
  S.raid.filter(r=>r.type==="Risk"&&r.impact==="High"&&!["Closed","Mitigated"].includes(r.status)).forEach(r=>out.push([1,`High risk open: ${esc(r.item)} · ${esc(r.owner)}`]));
+ {const mt=moneyTotals();if(mt.total>0&&mt.spent>mt.total)out.push([3,`Spending (${money(mt.spent)}) is over the budget including reserve (${money(mt.total)})`]);else if(mt.forecast>0&&mt.spent>mt.forecast)out.push([2,`Spending is into the reserve: ${money(mt.reserveUsed)} of ${money(mt.reserve)} used`])}
  (S.todos||[]).filter(x=>!x.done&&x.due&&D(x.due)<today()&&(isAdmin()||x.owner===me())).forEach(x=>out.push([2,`To-do overdue: ${esc(x.text)} (due ${fmt(x.due)}) · ${esc(x.owner)}`]));
  return out.sort((a,b)=>b[0]-a[0])}
 const STOP=new Set("the and for with this that from have has are was were will your our you they their them what when where which while into about over more most than then just also very really here there some such only make made like good great best new news uk how why its it's can not but all any one two get got via per out off top day week year time post reel video watch".split(" "));
@@ -693,7 +697,10 @@ function bindDrill(){document.querySelectorAll("[data-drill]").forEach(el=>{cons
  if(el.tagName!=="BUTTON"){el.tabIndex=0;el.setAttribute("role","button");el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}}}})}
 /* ---------- Phone layout: bottom tab bar, "More" sheet, card lists ---------- */
 const PRIMARY=["dashboard","mine","todo","plan"];
-const ICON={dashboard:"⌂︎",mine:"✓︎",todo:"☑︎",plan:"▤︎",logs:"⚑︎",brand:"◆︎",menuboard:"☷︎",growth:"↗︎",knowledge:"✦︎",team:"☺︎",more:"⋯"};
+/* "More" shows as current when the open section is one of those tucked into it at this screen size */
+function markMenu(){const n=$("#nav");if(!n)return;const mb=n.querySelector("[data-menu]"),cur=n.querySelector(`[data-v="${view}"]`);if(!mb)return;if(cur&&getComputedStyle(cur).display==="none")mb.setAttribute("aria-current","page");else mb.removeAttribute("aria-current")}
+window.addEventListener("resize",markMenu);
+const ICON={dashboard:"⌂︎",mine:"✓︎",todo:"☑︎",money:"£",plan:"▤︎",logs:"⚑︎",brand:"◆︎",menuboard:"☷︎",growth:"↗︎",knowledge:"✦︎",team:"☺︎",more:"⋯"};
 const isPhone=()=>window.matchMedia&&matchMedia("(max-width:760px)").matches;
 function openSheet(){const d=$("#sheet");$("#sheetc").innerHTML=`<div class="sheet-grab" aria-hidden="true"></div>
  <div class="sheet-who">${signedIn()?`<b>${esc(me())}</b> <span class="chip ${isAdmin()?"st-Done":""}">${isAdmin()?"Full access":"Team member"}</span>`:'<span class="mut">View only</span>'}</div>
@@ -713,7 +720,7 @@ function bindPhoneTasks(){const f=ui.f;$("#pq").oninput=e=>{f.q=e.target.value;c
  bindEdit();document.querySelectorAll("[data-qs]").forEach(b=>b.onclick=()=>setField(b.dataset.qs,"status",b.dataset.v))}
 /* ---------- Keep every open copy on the latest version ---------- */
 let updatePending=false;
-function checkVersion(v){if(!v||v===APP_VER||updatePending)return;updatePending=true;
+function checkVersion(v){if(!v||v<=APP_VER||updatePending)return;updatePending=true;
  const go=()=>{if(busy()||unsaved()||sync.pushing){setTimeout(go,3000);return}location.reload()};
  toast("Updating Project Norwood to the latest version…");setTimeout(go,2500)}
 /* ---------- In-app pop-ups: reminders, new to-dos assigned to you ---------- */
@@ -735,6 +742,92 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 /* ---------- To-dos linked to tasks ---------- */
 const todosFor=id=>(S.todos||[]).filter(x=>x.task===id);
 const taskOpts=v=>`<option value="">— none —</option>`+S.tasks.map(t=>`<option value="${esc(t.id)}"${t.id===v?" selected":""}>${esc(t.id)} · ${esc(t.name.slice(0,48))}</option>`).join("");
+/* ---------- Expenses: budget forecast per work item, reserve, spending log, partner stakes ---------- */
+const EXP_CATS=["Fit-out & building","Equipment & kit","Gas, electric & utilities","Legal & professional","Licences & compliance","Brand & marketing","Stock & supplies","Staff & training","Tech & systems","Rent, rates & deposits","Other"];
+const METHODS=["Own money (counts towards my stake)","Company account","Cash from takings"];
+const money=n=>(+n<0?"−":"")+"£"+Math.abs(+n||0).toLocaleString("en-GB",{minimumFractionDigits:2,maximumFractionDigits:2});
+const fin=()=>Object.assign({reserve:0,stakes:{}},S.finance||{});
+const isSpend=e=>e.kind!=="Cash paid in";
+function moneyTotals(){const B=S.budget||[],E=(S.expenses||[]).filter(isSpend),f=fin(),forecast=B.reduce((a,b)=>a+(+b.forecast||0),0),reserve=+f.reserve||0,spent=E.reduce((a,e)=>a+(+e.amount||0),0);
+ return {forecast,reserve,total:forecast+reserve,spent,left:forecast+reserve-spent,reserveUsed:Math.max(0,spent-forecast),
+  lineSpent:k=>E.filter(e=>e.line===k).reduce((a,e)=>a+(+e.amount||0),0),
+  unplanned:E.filter(e=>!e.line||!B.some(b=>b._k===e.line)).reduce((a,e)=>a+(+e.amount||0),0)}}
+const paidIn=n=>(S.expenses||[]).filter(e=>e.paidBy===n&&(e.kind==="Cash paid in"||String(e.method).startsWith("Own money"))).reduce((a,e)=>a+(+e.amount||0),0);
+const canExp=e=>isAdmin()||(signedIn()&&e.by===me()&&e.status!=="Approved");
+const mbar=(v,max,cls)=>`<span class="bar mb2"><i class="${cls||""}" style="width:${max>0?Math.min(100,v/max*100):0}%"></i></span>`;
+function expRow(e){const ln=(S.budget||[]).find(b=>b._k===e.line);
+ return `<li class="work"><div><b>${money(e.amount)}</b> ${esc(e.desc)}<div class="small mut">${fmt(e.date)} · ${esc(e.category||"")}${ln?` · ${esc(ln.item)}`:""} · paid by <b>${esc(e.paidBy)}</b> · ${esc(String(e.method||"").replace(" (counts towards my stake)",""))}${e.kind==="Cash paid in"?' <span class="chip st-Done">cash paid in</span>':""} ${e.status==="Approved"?'<span class="chip st-Done">approved</span>':'<span class="chip">awaiting approval</span>'}${safeImg(e.receipt)?` · <a href="${safeImg(e.receipt)}" target="_blank" rel="noopener">receipt</a>`:""}${e.notes?" · "+esc(e.notes):""}</div></div>
+ <div class="qbtns">${canExp(e)?`<button class="small" data-ee="${esc(e._k)}">Edit</button>`:""}${isAdmin()&&e.status!=="Approved"?`<button class="small pri" data-ea="${esc(e._k)}">✓ Approve</button>`:""}${isAdmin()?`<button class="small del" data-ex="${esc(e._k)}">Delete</button>`:""}</div></li>`}
+R.money=()=>{const sub=ui.money||"overview",t=moneyTotals(),f=fin(),B=S.budget||[],E=S.expenses||[];
+ const head=`<h2>Expenses</h2><p class="small mut">Budget forecast for each piece of work, the reserve, every pound spent, and what each partner has paid towards their committed stake.</p>
+ ${signedIn()?'<p><button class="pri" data-elog>+ Log an expense</button></p>':""}${seg("money",[["overview","Overview"],["log","Spending log"],["budget","Budget"]],sub)}`;
+ if(sub==="log"){const fw=ui.ew||"",fc=ui.ec||"",L=[...E].filter(e=>(!fw||e.paidBy===fw)&&(!fc||e.category===fc)).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  return head+`<div class="filters"><select id="ew" aria-label="Paid by"><option value="">Everyone</option>${teamNames().map(n=>`<option${n===fw?" selected":""}>${esc(n)}</option>`).join("")}</select><select id="ec" aria-label="Category"><option value="">All categories</option>${EXP_CATS.map(c=>`<option${c===fc?" selected":""}>${esc(c)}</option>`).join("")}</select><button id="ecsv">Export CSV</button></div>
+  <div class="card"><h3>${L.length} entr${L.length===1?"y":"ies"} · ${money(L.filter(isSpend).reduce((a,e)=>a+(+e.amount||0),0))}</h3>${L.length?`<ul class="worklist">${L.map(expRow).join("")}</ul>`:'<p class="mut small">Nothing logged yet.</p>'}</div>`}
+ if(sub==="budget"){return head+`<div class="card"><h3>Budget by work item</h3><p class="small mut">Forecast cost of each piece of work in the plan. Spending logged against a line is compared with its forecast.</p>
+  ${B.length?`<div class="tw"><table><thead><tr><th>Work item</th><th>Task</th><th>Category</th><th style="text-align:right">Forecast</th><th style="text-align:right">Spent</th><th style="text-align:right">Left</th><th></th></tr></thead><tbody>${[...B].sort((a,b)=>String(a.task||"~").localeCompare(String(b.task||"~"))).map(b=>{const sp=t.lineSpent(b._k),lf=(+b.forecast||0)-sp;return `<tr><td>${esc(b.item)}</td><td>${b.task&&task(b.task)?`<a href="#" data-edit="${esc(b.task)}">${esc(b.task)}</a>`:'<span class="mut">–</span>'}</td><td class="small">${esc(b.category||"")}</td><td style="text-align:right">${money(b.forecast)}</td><td style="text-align:right">${money(sp)}</td><td style="text-align:right" class="${lf<0?"bad":""}">${money(lf)}</td><td>${isAdmin()?`<button class="small" data-be="${esc(b._k)}">Edit</button>`:""}</td></tr>`}).join("")}
+  <tr><td colspan="3"><i>Spending not linked to a budget line</i></td><td></td><td style="text-align:right">${money(t.unplanned)}</td><td></td><td></td></tr>
+  <tr><td colspan="3"><b>Total forecast</b></td><td style="text-align:right"><b>${money(t.forecast)}</b></td><td style="text-align:right"><b>${money(t.spent)}</b></td><td style="text-align:right" class="${t.forecast-t.spent<0?"bad":""}"><b>${money(t.forecast-t.spent)}</b></td><td></td></tr></tbody></table></div>`:'<p class="mut small">No budget lines yet.</p>'}
+  ${isAdmin()?'<p><button class="pri" id="badd2">+ Add budget line</button> <button id="bfromplan">Add a line for every phase</button></p>':'<p class="small mut">Nishaf and Fanshad set the budget.</p>'}</div>
+  <div class="card"><h3>Budget reserve</h3><p>${money(f.reserve)} held back for overruns. ${t.reserveUsed>0?`<b class="${t.reserveUsed>t.reserve?"bad":"warn"}">${money(t.reserveUsed)} used</b>`:"Untouched so far."}</p>${mbar(t.reserveUsed,t.reserve,"warnbar")}${isAdmin()?'<p><button id="fset">Set reserve and stakes</button></p>':""}</div>`}
+ // overview
+ const cats=EXP_CATS.map(c=>[c,B.filter(b=>b.category===c).reduce((a,b)=>a+(+b.forecast||0),0),E.filter(e=>isSpend(e)&&e.category===c).reduce((a,e)=>a+(+e.amount||0),0)]).filter(x=>x[1]||x[2]);
+ const people=teamNames(),stakeTotal=people.reduce((a,n)=>a+(+f.stakes[n]||0),0);
+ return head+`<div class="grid"><div class="card hero"><div class="mut">Total budget</div><div class="big">${money(t.total)}</div><div class="small mut">${money(t.forecast)} forecast + ${money(t.reserve)} reserve</div></div>
+ <div class="card"><div class="mut">Spent so far</div><div class="big">${money(t.spent)}</div>${mbar(t.spent,t.total,t.spent>t.total?"badbar":"")}<div class="small mut">${t.total?Math.round(t.spent/t.total*100):0}% of budget</div></div>
+ <div class="card"><div class="mut">Left to spend</div><div class="big ${t.left<0?"bad":""}">${money(t.left)}</div><div class="small ${t.reserveUsed>0?"warn":"mut"}">${t.reserveUsed>0?money(t.reserveUsed)+" of the reserve used":"Reserve untouched"}</div></div></div>
+ <div class="card"><h3>Breakdown by category</h3>${cats.length?cats.map(([c,fc,sp])=>`<div class="phrow catrow"><span class="phn" title="${esc(c)}">${esc(c)}</span>${mbar(sp,Math.max(fc,sp),sp>fc&&fc>0?"badbar":"")}<span class="small">${money(sp)}<span class="mut"> / ${money(fc)}</span></span></div>`).join(""):'<p class="mut small">Add budget lines and log spending to see the breakdown.</p>'}<p class="small mut">Spent / forecast for each category.</p></div>
+ <div class="card"><h3>Partner stakes</h3><p class="small mut">Committed stake against money each person has put in – their own money spent on the project plus cash paid into the business.</p>
+ <div class="tw"><table><thead><tr><th>Person</th><th style="text-align:right">Committed</th><th style="text-align:right">Paid in</th><th style="text-align:right">Still to put in</th><th>Progress</th></tr></thead><tbody>${people.map(n=>{const c=+f.stakes[n]||0,pi=paidIn(n);return `<tr><td>${esc(n)}</td><td style="text-align:right">${money(c)}</td><td style="text-align:right">${money(pi)}</td><td style="text-align:right" class="${c-pi<0?"ok":""}">${c?money(Math.max(0,c-pi)):"–"}</td><td style="min-width:7rem">${c?mbar(pi,c,"okbar"):'<span class="mut small">no stake set</span>'}</td></tr>`}).join("")}
+ <tr><td><b>Total</b></td><td style="text-align:right"><b>${money(stakeTotal)}</b></td><td style="text-align:right"><b>${money(people.reduce((a,n)=>a+paidIn(n),0))}</b></td><td></td><td></td></tr></tbody></table></div>${isAdmin()?'<p><button id="fset">Set reserve and stakes</button></p>':""}</div>
+ <div class="card"><h3>Latest spending</h3>${E.length?`<ul class="worklist">${[...E].sort((a,b)=>String(b.at).localeCompare(String(a.at))).slice(0,5).map(expRow).join("")}</ul>`:'<p class="mut small">Nothing logged yet.</p>'}<button data-seg="money" data-val="log">See full log</button></div>`};
+function expDialog(e,preset){const isNew=!e,ad=isAdmin();if(!signedIn()){showLogin("Sign in to log expenses.");return}if(!isNew&&!canExp(e)){toast("Only Nishaf or Fanshad can change this – it's approved or not yours.");return}
+ e=e?clone(e):Object.assign({kind:"Expense",date:iso(today()),paidBy:me(),by:me(),method:METHODS[0],category:EXP_CATS[0],status:"Logged"},preset||{});
+ const f=$("#dlgf"),B=S.budget||[];
+ f.innerHTML=`<h3>${isNew?"Log an expense":"Edit expense"}</h3>
+ <label>Type<select name="kind">${["Expense","Cash paid in"].map(k=>`<option${k===e.kind?" selected":""}>${k}</option>`).join("")}</select></label>
+ <label>Amount (£)<input name="amount" type="number" inputmode="decimal" step="0.01" min="0" required value="${e.amount??""}"></label>
+ <label>What for<input name="desc" required value="${esc(e.desc||"")}" placeholder="e.g. Skip hire for strip-out"></label>
+ <label>Date<input name="date" type="date" required value="${esc(e.date||iso(today()))}"></label>
+ <label>Category<select name="category">${EXP_CATS.map(c=>`<option${c===e.category?" selected":""}>${esc(c)}</option>`).join("")}</select></label>
+ <label>Budget line (work item)<select name="line"><option value="">Not in the budget / don't know</option>${B.map(b=>`<option value="${esc(b._k)}"${b._k===e.line?" selected":""}>${esc(b.item)}${b.task?" ("+esc(b.task)+")":""}</option>`).join("")}</select></label>
+ ${ad?`<label>Paid by<select name="paidBy">${teamNames().map(n=>`<option${n===e.paidBy?" selected":""}>${esc(n)}</option>`).join("")}</select></label>`:""}
+ <label>Paid with<select name="method">${METHODS.map(m=>`<option${m===e.method?" selected":""}>${esc(m)}</option>`).join("")}</select></label>
+ <label>Receipt photo (optional)${safeImg(e.receipt)?`<img src="${safeImg(e.receipt)}" alt="" class="bimg" style="max-height:120px">`:""}<input type="file" name="receipt" accept="image/*" capture="environment"></label>
+ <label>Notes<textarea name="notes" rows="2">${esc(e.notes||"")}</textarea></label>
+ ${ad?`<label><input type="checkbox" name="approved" style="width:auto"${e.status==="Approved"?" checked":""}> Approved</label>`:'<p class="small mut">Nishaf or Fanshad will approve it. You can edit it until then.</p>'}
+ <p style="display:flex;gap:.5rem;justify-content:flex-end"><button value="cancel" formnovalidate>Cancel</button><button class="pri" value="ok">Save</button></p>`;
+ const d=$("#dlg");d.returnValue="";d.showModal();
+ d.onclose=async()=>{if(d.returnValue!=="ok")return;const fd=new FormData(f),file=fd.get("receipt");
+  if(file&&file.size){try{e.receipt=await shrinkImg(file)}catch(x){toast("That photo couldn't be read – try again.")}}
+  e.kind=fd.get("kind");e.amount=Math.round((+fd.get("amount")||0)*100)/100;e.desc=String(fd.get("desc")||"").trim();e.date=fd.get("date");e.category=fd.get("category");e.line=fd.get("line")||"";
+  if(ad&&fd.get("paidBy"))e.paidBy=fd.get("paidBy");e.method=e.kind==="Cash paid in"?METHODS[0]:fd.get("method");e.notes=String(fd.get("notes")||"");if(ad)e.status=fd.get("approved")?"Approved":"Logged";
+  S.expenses=S.expenses||[];if(isNew){e.id="E"+Date.now().toString(36);e.at=new Date().toISOString();S.expenses.push(e);log(`${e.kind==="Cash paid in"?"Cash paid in":"Expense logged"}: ${money(e.amount)} – ${e.desc} (${e.paidBy})`)}
+  else{const i=S.expenses.findIndex(x=>x._k===e._k);if(i>=0)S.expenses[i]=e;log(`Expense updated: ${money(e.amount)} – ${e.desc}`)}render();toast(isNew?"Logged.":"Saved.")}}
+function lineDialog(b){if(!isAdmin())return;const isNew=!b;b=b?clone(b):{category:EXP_CATS[0],task:"",forecast:0};const f=$("#dlgf");
+ f.innerHTML=`<h3>${isNew?"Add budget line":"Edit budget line"}</h3><label>Work item<input name="item" required value="${esc(b.item||"")}" placeholder="e.g. Extraction canopy supply and fit"></label>
+ <label>Linked task<select name="task">${taskOpts(b.task||"")}</select></label><label>Category<select name="category">${EXP_CATS.map(c=>`<option${c===b.category?" selected":""}>${esc(c)}</option>`).join("")}</select></label>
+ <label>Forecast cost (£)<input name="forecast" type="number" inputmode="decimal" step="0.01" min="0" value="${b.forecast||""}"></label><label>Notes<textarea name="notes" rows="2">${esc(b.notes||"")}</textarea></label>
+ <p style="display:flex;gap:.5rem;justify-content:space-between">${isNew?"<span></span>":'<button value="delete" class="del" formnovalidate>Delete line</button>'}<span style="display:flex;gap:.5rem"><button value="cancel" formnovalidate>Cancel</button><button class="pri" value="ok">Save</button></span></p>`;
+ const d=$("#dlg");d.returnValue="";d.showModal();d.onclose=()=>{if(d.returnValue==="delete"){if(confirm("Delete this budget line? Spending logged against it stays, as unbudgeted.")){S.budget=S.budget.filter(x=>x._k!==b._k);log("Budget line deleted: "+b.item);render()}return}
+  if(d.returnValue!=="ok")return;const fd=new FormData(f);b.item=String(fd.get("item")||"").trim();b.task=fd.get("task")||"";b.category=fd.get("category");b.forecast=Math.round((+fd.get("forecast")||0)*100)/100;b.notes=String(fd.get("notes")||"");
+  S.budget=S.budget||[];if(isNew){b.id="B"+Date.now().toString(36);S.budget.push(b);log(`Budget line added: ${b.item} ${money(b.forecast)}`)}else{const i=S.budget.findIndex(x=>x._k===b._k);if(i>=0)S.budget[i]=b;log(`Budget line updated: ${b.item} ${money(b.forecast)}`)}render()}}
+function finDialog(){if(!isAdmin())return;const fv=fin(),f=$("#dlgf");
+ f.innerHTML=`<h3>Reserve and partner stakes</h3><label>Budget reserve (£)<input name="reserve" type="number" inputmode="decimal" step="0.01" min="0" value="${fv.reserve||""}"></label><h4>Committed stake per person (£)</h4>${teamNames().map(n=>`<label>${esc(n)}<input name="st_${esc(n)}" type="number" inputmode="decimal" step="0.01" min="0" value="${fv.stakes[n]||""}"></label>`).join("")}
+ <p style="display:flex;gap:.5rem;justify-content:flex-end"><button value="cancel" formnovalidate>Cancel</button><button class="pri" value="ok">Save</button></p>`;
+ const d=$("#dlg");d.returnValue="";d.showModal();d.onclose=()=>{if(d.returnValue!=="ok")return;const fd=new FormData(f),st={};teamNames().forEach(n=>{const v=+fd.get("st_"+n)||0;if(v)st[n]=v});
+  S.finance={reserve:+fd.get("reserve")||0,stakes:st};log(`Budget reserve ${money(S.finance.reserve)}; stakes updated`);render()}}
+A.money=()=>{bindSeg();bindEdit();document.querySelectorAll("[data-elog]").forEach(b=>b.onclick=()=>expDialog(null));
+ document.querySelectorAll("[data-ee]").forEach(b=>b.onclick=()=>expDialog((S.expenses||[]).find(x=>x._k===b.dataset.ee)));
+ document.querySelectorAll("[data-ea]").forEach(b=>b.onclick=()=>{const e=(S.expenses||[]).find(x=>x._k===b.dataset.ea);if(e){e.status="Approved";log(`Expense approved: ${money(e.amount)} – ${e.desc} (${e.paidBy})`);render()}});
+ document.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{const e=(S.expenses||[]).find(x=>x._k===b.dataset.ex);if(e&&confirm(`Delete ${money(e.amount)} – ${e.desc}?`)){S.expenses=S.expenses.filter(x=>x!==e);log(`Expense deleted: ${money(e.amount)} – ${e.desc}`);render()}});
+ document.querySelectorAll("[data-be]").forEach(b=>b.onclick=()=>lineDialog((S.budget||[]).find(x=>x._k===b.dataset.be)));
+ if($("#badd2"))$("#badd2").onclick=()=>lineDialog(null);
+ if($("#bfromplan"))$("#bfromplan").onclick=()=>{const have=new Set((S.budget||[]).map(b=>b.item));let n=0;phases().forEach(ph=>{if(!have.has(ph)){S.budget.push({id:"B"+Date.now().toString(36)+n,item:ph,task:"",category:"Other",forecast:0,notes:"Fill in the forecast"});n++}});if(n){log(`Added ${n} budget lines from the plan phases`);render();toast(n+" lines added – edit each to set its forecast.")}else toast("Every phase already has a line.")};
+ document.querySelectorAll("#fset").forEach(b=>b.onclick=finDialog);
+ if($("#ew"))$("#ew").onchange=e=>{ui.ew=e.target.value;render()};if($("#ec"))$("#ec").onchange=e=>{ui.ec=e.target.value;render()};
+ if($("#ecsv"))$("#ecsv").onclick=()=>{const q=v=>`"${String(v??"").replace(/"/g,'""')}"`,B=S.budget||[];
+  dl("project-norwood-expenses.csv",["Date,Type,Amount,What for,Category,Budget line,Paid by,Paid with,Status,Notes",...(S.expenses||[]).map(e=>[e.date,e.kind,(+e.amount||0).toFixed(2),e.desc,e.category,(B.find(b=>b._k===e.line)||{}).item||"",e.paidBy,e.method,e.status,e.notes].map(q).join(","))].join("\n"),"text/csv")}};
 /* ---------- To-do list, reminders and personal calendar feed ---------- */
 const fmtWhen=r=>r?new Date(r).toLocaleString("en-GB",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"";
 const toLocalInput=r=>{if(!r)return"";const d=new Date(r);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)};
