@@ -52,7 +52,7 @@ h2,h3{letter-spacing:-.01em}h2{font-weight:800}
 nav button{font-weight:600;padding:.45rem .55rem;font-size:.93rem}nav button:hover{background:color-mix(in srgb,var(--acc) 10%,transparent)}nav button[aria-current=page],nav button[aria-current=page]:hover{background:var(--acc);color:#fff}
 header{gap:.4rem}header h1{margin-right:.5rem}#who .chip{font-size:.7rem}
 @media(max-width:1340px){#who .chip{display:none}}
-@media (min-width:761px) and (max-width:1560px){nav button[data-v=menuboard],nav button[data-v=growth],nav button[data-v=knowledge],nav button[data-v=team],nav button[data-v=more]{display:none}header nav button[data-menu]{display:inline-flex;gap:.3rem;align-items:center}header nav button[data-menu] .ico{display:inline}}
+@media (min-width:761px) and (max-width:1560px){nav button[data-v=menuboard],nav button[data-v=growth],nav button[data-v=knowledge],nav button[data-v=team],nav button[data-v=more],nav button[data-v=contacts]{display:none}header nav button[data-menu]{display:inline-flex;gap:.3rem;align-items:center}header nav button[data-menu] .ico{display:inline}}
 @media(max-width:1420px){nav button{padding:.4rem .42rem;font-size:.9rem}header h1{font-size:1.1rem;margin-right:.25rem}#sync,#savebtn,#bell{padding-left:.5rem;padding-right:.5rem}}
 button.pri{box-shadow:0 2px 0 color-mix(in srgb,var(--acc) 60%,#000)}button.pri:active{transform:translateY(1px);box-shadow:none}
 .note{border-left-color:var(--hi)}
@@ -109,6 +109,8 @@ a{color:var(--acc);text-underline-offset:2px}a:hover{color:color-mix(in srgb,var
 @media (prefers-reduced-motion:reduce){#pop{transition:none}}
 .mb2{display:block;height:9px;margin:.35rem 0}.badbar{background:#c62828 !important}.warnbar{background:#b26a00 !important}.okbar{background:#2e7d32 !important}
 .catrow{grid-template-columns:minmax(0,11rem) 1fr auto}.catrow .mb2{margin:0}
+.ccard h4{font-size:1.05rem}.cbtns{display:flex;gap:.4rem;flex-wrap:wrap;margin:.5rem 0}.cbtns .btn{min-height:40px;padding:.35rem .75rem}
+tr.lowq td{background:color-mix(in srgb,#2e7d32 8%,transparent)}
 .seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin:.25rem 0 1rem}.seg button{border:0;border-radius:0;background:var(--card);padding:.5rem 1rem;font-weight:600}.seg button[aria-pressed=true]{background:var(--acc);color:#fff}
 .worklist{list-style:none;padding:0;margin:0}.work{display:flex;gap:.75rem;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--line)}.work:last-child{border-bottom:0}.qbtns{display:flex;gap:.35rem;flex-wrap:wrap;justify-content:flex-end}
 details.card summary{cursor:pointer}
@@ -220,8 +222,8 @@ const me=()=>sync.name||"";
  copy, so the app still works offline and pushes queued changes when it reconnects. */
 const SB={url:"https://ufinmrgnqwutxwntcdvs.supabase.co",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmaW5tcmducXd1dHh3bnRjZHZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNTQ3NzQsImV4cCI6MjEwNjgzMDc3NH0.OH5ZXB5eUSDWsDdRcn63Vm0fGSbC-eCg-JgHY_2c4Uo"};
 if(window.NORWOOD_SB)Object.assign(SB,window.NORWOOD_SB);
-const APP_VER="2026-11-07e";
-const COLLS=["team","tasks","raid","questions","menu","kpis","checklist","activity","brandboard","kb","growth","todos","budget","expenses"];
+const APP_VER="2026-11-07f";
+const COLLS=["team","tasks","raid","questions","menu","kpis","checklist","activity","brandboard","kb","growth","todos","budget","expenses","contacts","quotes"];
 const sync={pin:localStorage.getItem(KEY+".pin")||"",name:localStorage.getItem(KEY+".name")||"",role:localStorage.getItem(KEY+".role")||"",base:null,state:"off",peers:[],pushT:0,pullT:0,pushing:false,again:false,pendingPull:false,chan:null,err:""};
 /* ---------- Access rules (the server enforces the same rules; this only shapes the screen) ----------
  Nishaf, Fanshad: full access.  Everyone else: update status, progress, dates and notes on tasks they own,
@@ -329,7 +331,7 @@ async function init(){
  const raw=localStorage.getItem(KEY);
  if(raw){try{S=JSON.parse(raw)}catch(e){}}
  if(!S){try{const r=await fetch("./data.json",{cache:"no-store"});if(r.ok)S=await r.json()}catch(e){} if(!S)S=clone(SEED)}
- S.activity=S.activity||[];S.brandboard=S.brandboard||[];S.kb=S.kb||[];S.growth=S.growth||[];S.todos=S.todos||[];S.budget=S.budget||[];S.expenses=S.expenses||[];keyify(S,true);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+ S.activity=S.activity||[];S.brandboard=S.brandboard||[];S.kb=S.kb||[];S.growth=S.growth||[];S.todos=S.todos||[];S.budget=S.budget||[];S.expenses=S.expenses||[];S.contacts=S.contacts||[];S.quotes=S.quotes||[];keyify(S,true);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
  try{sync.base=JSON.parse(localStorage.getItem(KEY+".base")||"null")}catch(e){sync.base=null}
  if(localStorage.getItem(KEY+".theme")==="dark")document.documentElement.dataset.theme="dark";
  $("#theme").onclick=()=>{const d=document.documentElement.dataset.theme==="dark";document.documentElement.dataset.theme=d?"":"dark";localStorage.setItem(KEY+".theme",d?"light":"dark")};
@@ -337,7 +339,7 @@ async function init(){
  render();bindLogin();
  if(signedIn())connect();else{setSync("off");showLogin()}
 }
-const VIEWS={dashboard:"Home",mine:"My work",todo:"To-do",money:"Expenses",plan:"Plan",logs:"Risks",brand:"Brand",menuboard:"Menu",growth:"Franchise",knowledge:"Knowledge",team:"Team",more:"More"};
+const VIEWS={dashboard:"Home",mine:"My work",todo:"To-do",money:"Expenses",plan:"Plan",contacts:"Contacts",logs:"Risks",brand:"Brand",menuboard:"Menu",growth:"Franchise",knowledge:"Knowledge",team:"Team",more:"More"};
 if({tasks:1,gantt:1,calendar:1}[view])view="plan";if({reference:1,data:1}[view])view="more";
 function setHdr(){const h=document.querySelector("header");if(h&&getComputedStyle(h).position==="sticky")document.documentElement.style.setProperty("--hdr",h.offsetHeight+"px");else document.documentElement.style.setProperty("--hdr","0px")}
 window.addEventListener("resize",setHdr);
@@ -701,7 +703,7 @@ const PRIMARY=["dashboard","mine","todo","money","plan"];
 /* "More" shows as current when the open section is one of those tucked into it at this screen size */
 function markMenu(){const n=$("#nav");if(!n)return;const mb=n.querySelector("[data-menu]"),cur=n.querySelector(`[data-v="${view}"]`);if(!mb)return;if(cur&&getComputedStyle(cur).display==="none")mb.setAttribute("aria-current","page");else mb.removeAttribute("aria-current")}
 window.addEventListener("resize",markMenu);
-const ICON={dashboard:"⌂︎",mine:"✓︎",todo:"☑︎",money:"£",plan:"▤︎",logs:"⚑︎",brand:"◆︎",menuboard:"☷︎",growth:"↗︎",knowledge:"✦︎",team:"☺︎",more:"⋯"};
+const ICON={dashboard:"⌂︎",mine:"✓︎",todo:"☑︎",money:"£",contacts:"☎︎",plan:"▤︎",logs:"⚑︎",brand:"◆︎",menuboard:"☷︎",growth:"↗︎",knowledge:"✦︎",team:"☺︎",more:"⋯"};
 const isPhone=()=>window.matchMedia&&matchMedia("(max-width:760px)").matches;
 function openSheet(){const d=$("#sheet");$("#sheetc").innerHTML=`<div class="sheet-grab" aria-hidden="true"></div>
  <div class="sheet-who">${signedIn()?`<b>${esc(me())}</b> <span class="chip ${isAdmin()?"st-Done":""}">${isAdmin()?"Full access":"Team member"}</span>`:'<span class="mut">View only</span>'}</div>
@@ -758,6 +760,91 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 /* ---------- To-dos linked to tasks ---------- */
 const todosFor=id=>(S.todos||[]).filter(x=>x.task===id);
 const taskOpts=v=>`<option value="">— none —</option>`+S.tasks.map(t=>`<option value="${esc(t.id)}"${t.id===v?" selected":""}>${esc(t.id)} · ${esc(t.name.slice(0,48))}</option>`).join("");
+/* ---------- Contacts: every stakeholder in one place ---------- */
+const CTYPES=["Supplier","Contractor / builder","Consultant","Agent","Solicitor / legal","Accountant / finance","Council / regulator","Landlord","Utility","Equipment / kit","Marketing / design","Recruitment / staff","Other"];
+const telHref=n=>"tel:"+String(n||"").replace(/[^\d+]/g,"");
+const waHref=n=>{let d=String(n||"").replace(/\D/g,"");if(d.startsWith("0"))d="44"+d.slice(1);return d?"https://wa.me/"+d:""};
+const canContact=c=>isAdmin()||(signedIn()&&c.who===me());
+function vcard(c){const e=v=>String(v||"").replace(/([,;\\])/g,"\\$1").replace(/\n/g,"\\n");
+ return ["BEGIN:VCARD","VERSION:3.0",`FN:${e(c.name)}`,c.company?`ORG:${e(c.company)}`:"",c.role?`TITLE:${e(c.role)}`:"",c.phone?`TEL;TYPE=WORK,VOICE:${e(c.phone)}`:"",c.phone2?`TEL;TYPE=CELL:${e(c.phone2)}`:"",c.email?`EMAIL;TYPE=WORK:${e(c.email)}`:"",c.website?`URL:${e(c.website)}`:"",c.address?`ADR;TYPE=WORK:;;${e(c.address)};;;;`:"",`NOTE:${e((c.type||"")+(c.notes?" – "+c.notes:"")+" (Project Norwood)")}`,"END:VCARD"].filter(Boolean).join("\r\n")}
+function contactCard(c){const q=(S.quotes||[]).filter(x=>x.supplier===c._k),acc=q.filter(x=>x.status==="Accepted");
+ return `<div class="card ccard"><div class="small mut">${esc(c.type||"")}${c.owner?` · looked after by ${esc(c.owner)}`:""}</div><h4 style="margin:.25rem 0">${esc(c.name)}${c.company&&c.company!==c.name?` <span class="mut small">· ${esc(c.company)}</span>`:""}</h4>${c.role?`<div class="small">${esc(c.role)}</div>`:""}
+ <div class="cbtns">${c.phone?`<a class="btn" href="${esc(telHref(c.phone))}">📞 Call</a>`:""}${c.phone||c.phone2?`<a class="btn" target="_blank" rel="noopener" href="${esc(waHref(c.phone2||c.phone))}">WhatsApp</a>`:""}${c.email?`<a class="btn" href="mailto:${esc(c.email)}">✉ Email</a>`:""}${safeUrl(c.website)?`<a class="btn" target="_blank" rel="noopener" href="${esc(safeUrl(c.website))}">Website</a>`:""}</div>
+ <div class="small">${c.phone?`${esc(c.phone)}`:""}${c.phone2?` · ${esc(c.phone2)}`:""}${c.email?`<br>${esc(c.email)}`:""}${c.address?`<br>${esc(c.address)}`:""}</div>
+ ${c.notes?`<p class="small" style="white-space:pre-wrap">${esc(c.notes)}</p>`:""}${q.length?`<p class="small"><b>${q.length} quote${q.length>1?"s":""}</b>${acc.length?` · ${acc.length} accepted (${money(acc.reduce((a,x)=>a+qNet(x),0))} ex VAT)`:""}</p>`:""}
+ <div class="qbtns" style="justify-content:flex-start">${canContact(c)?`<button class="small" data-ce="${esc(c._k)}">Edit</button>`:""}<button class="small" data-cv="${esc(c._k)}">Save to phone</button>${isAdmin()?`<button class="small del" data-cx="${esc(c._k)}">Delete</button>`:""}</div></div>`}
+R.contacts=()=>{const q=(ui.cq||"").toLowerCase(),ft=ui.ct||"",L=[...(S.contacts||[])].filter(c=>(!ft||c.type===ft)&&(!q||JSON.stringify([c.name,c.company,c.role,c.email,c.phone,c.notes,c.type]).toLowerCase().includes(q))).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+ const counts={};(S.contacts||[]).forEach(c=>counts[c.type]=(counts[c.type]||0)+1);
+ return `<h2>Contacts</h2><p class="small mut">Everyone we deal with – suppliers, contractors, agents, consultants, solicitors, council, landlord, utilities. Tap to call, email or WhatsApp, or save a contact to your phone.</p>
+ ${signedIn()?'<p><button class="pri" id="cadd">+ Add contact</button> <button id="ccsv">Export CSV</button></p>':""}
+ <div class="filters" role="search"><input id="cq" type="search" enterkeyhint="search" placeholder="Search name, company, email…" aria-label="Search contacts" value="${esc(ui.cq||"")}"></div>
+ <div class="strip"><button class="chipbtn" data-ct="" aria-pressed="${!ft}">All <b>${(S.contacts||[]).length}</b></button>${CTYPES.filter(t=>counts[t]).map(t=>`<button class="chipbtn" data-ct="${esc(t)}" aria-pressed="${ft===t}">${esc(t)} <b>${counts[t]}</b></button>`).join("")}</div>
+ <div class="grid">${L.map(contactCard).join("")||'<p class="mut">No contacts yet.</p>'}</div>`};
+function contactDialog(c,preset,after){const isNew=!c;if(!signedIn()){showLogin("Sign in to add contacts.");return}if(!isNew&&!canContact(c)){toast("Only "+c.who+", Nishaf or Fanshad can edit this contact.");return}
+ c=c?clone(c):Object.assign({type:"Supplier",who:me(),owner:me()},preset||{});const f=$("#dlgf");
+ const fld=(k,l,t,ph)=>`<label>${l}<input name="${k}" type="${t==="url"?"text":t||"text"}" value="${esc(c[k]||"")}"${ph?` placeholder="${esc(ph)}"`:""}${t==="tel"?' inputmode="tel" autocomplete="tel"':t==="email"?' inputmode="email" autocomplete="email" autocapitalize="none"':t==="url"?' inputmode="url" autocapitalize="none" autocorrect="off"':""}${k==="name"?" required":""}></label>`;
+ f.innerHTML=`<h3>${isNew?"Add contact":"Edit contact"}</h3>${fld("name","Name (person or business)")}${fld("company","Company")}
+ <label>Type<select name="type">${CTYPES.map(t=>`<option${t===c.type?" selected":""}>${esc(t)}</option>`).join("")}</select></label>${fld("role","Role / what they do","text","e.g. Extraction engineer, Sales")}
+ ${fld("phone","Phone","tel")}${fld("phone2","Mobile / WhatsApp","tel")}${fld("email","Email","email")}${fld("website","Website","url","https://")}${fld("address","Address")}
+ <label>Looked after by<select name="owner">${teamNames().map(n=>`<option${n===c.owner?" selected":""}>${esc(n)}</option>`).join("")}</select></label>
+ <label>Notes<textarea name="notes" rows="3" placeholder="Account number, terms, who referred them…">${esc(c.notes||"")}</textarea></label>
+ <p style="display:flex;gap:.5rem;justify-content:flex-end"><button value="cancel" formnovalidate>Cancel</button><button class="pri" value="ok">Save</button></p>`;
+ const d=$("#dlg");d.returnValue="";d.showModal();d.onclose=()=>{if(d.returnValue!=="ok")return;const fd=new FormData(f);["name","company","type","role","phone","phone2","email","website","address","owner","notes"].forEach(k=>c[k]=String(fd.get(k)||"").trim());c.website=safeUrl(c.website)||(/^[\w.-]+\.[a-z]{2,}/i.test(c.website)?"https://"+c.website:"");
+  S.contacts=S.contacts||[];if(isNew){c.id="C"+Date.now().toString(36);c.at=new Date().toISOString();S.contacts.push(c);log(`Contact added: ${c.name} (${c.type})`)}else{const i=S.contacts.findIndex(x=>x._k===c._k);if(i>=0)S.contacts[i]=c;log(`Contact updated: ${c.name}`)}
+  render();if(after)after(c)}}
+A.contacts=()=>{if($("#cadd"))$("#cadd").onclick=()=>contactDialog(null);
+ $("#cq").oninput=e=>{ui.cq=e.target.value;const p=e.target.selectionStart;render();const i=$("#cq");i.focus();try{i.setSelectionRange(p,p)}catch(x){}};
+ document.querySelectorAll("[data-ct]").forEach(b=>b.onclick=()=>{ui.ct=b.dataset.ct;render()});
+ document.querySelectorAll("[data-ce]").forEach(b=>b.onclick=()=>contactDialog(S.contacts.find(x=>x._k===b.dataset.ce)));
+ document.querySelectorAll("[data-cv]").forEach(b=>b.onclick=()=>{const c=S.contacts.find(x=>x._k===b.dataset.cv);if(c)dl((c.name||"contact").replace(/[^\w-]+/g,"-")+".vcf",vcard(c),"text/vcard")});
+ document.querySelectorAll("[data-cx]").forEach(b=>b.onclick=()=>{const c=S.contacts.find(x=>x._k===b.dataset.cx);if(c&&confirm("Delete "+c.name+"?")){S.contacts=S.contacts.filter(x=>x!==c);log("Contact deleted: "+c.name);render()}});
+ if($("#ccsv"))$("#ccsv").onclick=()=>{const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;dl("project-norwood-contacts.csv",["Name,Company,Type,Role,Phone,Mobile,Email,Website,Address,Looked after by,Notes",...(S.contacts||[]).map(c=>[c.name,c.company,c.type,c.role,c.phone,c.phone2,c.email,c.website,c.address,c.owner,c.notes].map(q).join(","))].join("\n"),"text/csv")}};
+/* ---------- Quotes: supplier estimates per work item (compared ex VAT) ---------- */
+const QSTAT=["Received","Shortlisted","Accepted","Rejected"];
+const qNet=x=>{const a=+x.amount||0;return x.vat==="inc"?a/1.2:a};
+const qGross=x=>{const a=+x.amount||0;return x.vat==="inc"?a:x.vat==="none"?a:a*1.2};
+const committedFor=k=>{const acc=(S.quotes||[]).filter(x=>x.line===k&&x.status==="Accepted").reduce((a,x)=>a+qNet(x),0),paid=(S.expenses||[]).filter(e=>isSpend(e)&&e.line===k).reduce((a,e)=>a+(+e.amount||0),0);return Math.max(0,acc-paid)};
+const committedTotal=()=>(S.budget||[]).reduce((a,b)=>a+committedFor(b._k),0);
+const canQuote=x=>isAdmin()||(signedIn()&&x.who===me()&&x.status!=="Accepted");
+const supName=x=>{const c=(S.contacts||[]).find(y=>y._k===x.supplier);return c?c.name:(x.supplierName||"Unknown supplier")};
+function quotesView(){const Q=S.quotes||[],B=S.budget||[],groups=[...B.map(b=>[b._k,b.item+(b.task?" ("+b.task+")":""),+b.forecast||0]),["","Not linked to a budget line",0]].map(([k,label,fc])=>[k,label,fc,Q.filter(x=>(x.line||"")===k&&(k||!B.some(b=>b._k===x.line)))]).filter(g=>g[3].length);
+ const sup={};Q.forEach(x=>{const n=supName(x);sup[n]=sup[n]||{n,q:0,acc:0,k:x.supplier};sup[n].q++;if(x.status==="Accepted")sup[n].acc+=qNet(x)});
+ const today0=today();
+ return `<p class="small mut">Keep every estimate and quotation here and compare them like-for-like (ex VAT). Good practice: get at least three quotes for anything over £1,000. Nishaf and Fanshad accept the winning quote.</p>
+ ${signedIn()?'<p><button class="pri" data-qadd>+ Add a quote</button></p>':""}
+ ${groups.length?groups.map(([k,label,fc,qs])=>{const sorted=[...qs].sort((a,b)=>qNet(a)-qNet(b)),low=sorted.filter(x=>x.status!=="Rejected")[0],live=qs.filter(x=>x.status!=="Rejected");
+  return `<div class="card"><h3>${esc(label)}</h3><p class="small mut">${fc?`Budget ${money(fc)} · `:""}${qs.length} quote${qs.length>1?"s":""}${fc>=1000&&live.length<3?` · <span class="warn">get ${3-live.length} more for a fair comparison</span>`:""}</p>
+  <div class="tw"><table><thead><tr><th>Supplier</th><th>What's included</th><th style="text-align:right">Ex VAT</th><th style="text-align:right">Inc VAT</th><th>Valid until</th><th>Status</th><th></th></tr></thead><tbody>${sorted.map(x=>{const exp=x.valid&&D(x.valid)<today0&&x.status!=="Accepted";return `<tr class="${x===low&&live.length>1?"lowq":""}"><td><b>${esc(supName(x))}</b>${x===low&&live.length>1?' <span class="chip st-Done">lowest</span>':""}</td><td class="small">${esc(x.desc||"")}${x.terms?`<br><span class="mut">${esc(x.terms)}</span>`:""}${safeImg(x.file)?` · <a href="${safeImg(x.file)}" target="_blank" rel="noopener">quote</a>`:safeUrl(x.link)?` · <a href="${esc(safeUrl(x.link))}" target="_blank" rel="noopener">quote</a>`:""}</td><td style="text-align:right">${money(qNet(x))}</td><td style="text-align:right">${money(qGross(x))}</td><td class="small ${exp?"bad":""}">${x.valid?fmt(x.valid)+(exp?" (expired)":""):"–"}</td><td><span class="chip ${x.status==="Accepted"?"st-Done":x.status==="Rejected"?"":"st-Inprogress"}">${esc(x.status)}</span></td><td class="qbtns">${canQuote(x)?`<button class="small" data-qe="${esc(x._k)}">Edit</button>`:""}${isAdmin()&&x.status!=="Accepted"?`<button class="small pri" data-qa="${esc(x._k)}">Accept</button>`:""}${isAdmin()?`<button class="small del" data-qx="${esc(x._k)}">Delete</button>`:""}</td></tr>`}).join("")}</tbody></table></div></div>`}).join(""):'<div class="card"><p class="mut">No quotes yet. Add the first one with “+ Add a quote”.</p></div>'}
+ <div class="card"><h3>Suppliers quoting</h3>${Object.values(sup).length?`<div class="tw"><table><thead><tr><th>Supplier</th><th style="text-align:right">Quotes</th><th style="text-align:right">Accepted (ex VAT)</th></tr></thead><tbody>${Object.values(sup).sort((a,b)=>b.acc-a.acc||b.q-a.q).map(s=>`<tr><td>${s.k?`<a href="#" data-gocontact="${esc(s.k)}">${esc(s.n)}</a>`:esc(s.n)}</td><td style="text-align:right">${s.q}</td><td style="text-align:right">${s.acc?money(s.acc):"–"}</td></tr>`).join("")}</tbody></table></div>`:'<p class="mut small">Suppliers appear here once they have quoted.</p>'}<p class="small mut">Full details are in the Contacts tab.</p></div>`}
+function quoteDialog(x){const isNew=!x;if(!signedIn()){showLogin("Sign in to add quotes.");return}if(!isNew&&!canQuote(x)){toast("This quote is accepted or not yours – only Nishaf or Fanshad can change it.");return}
+ x=x?clone(x):{who:me(),status:"Received",vat:"ex",date:iso(today())};const f=$("#dlgf"),C=[...(S.contacts||[])].sort((a,b)=>String(a.name).localeCompare(String(b.name))),B=S.budget||[];
+ f.innerHTML=`<h3>${isNew?"Add a quote":"Edit quote"}</h3>
+ <label>Supplier<select name="supplier"><option value="">— choose —</option>${C.map(c=>`<option value="${esc(c._k)}"${c._k===x.supplier?" selected":""}>${esc(c.name)}${c.type?" · "+esc(c.type):""}</option>`).join("")}<option value="__new">+ New supplier…</option></select></label>
+ <label class="newsup" style="display:none">New supplier name<input name="supplierName" value="${esc(x.supplierName||"")}"></label>
+ <label>Work item (budget line)<select name="line"><option value="">Not linked</option>${B.map(b=>`<option value="${esc(b._k)}"${b._k===x.line?" selected":""}>${esc(b.item)}${b.task?" ("+esc(b.task)+")":""}</option>`).join("")}</select></label>
+ <label>What's included<textarea name="desc" rows="2" required placeholder="Scope, model, quantities…">${esc(x.desc||"")}</textarea></label>
+ <label>Amount (£)<input name="amount" type="number" inputmode="decimal" step="0.01" min="0" required value="${x.amount??""}"></label>
+ <label>VAT<select name="vat">${[["ex","Amount is ex VAT (+20%)"],["inc","Amount includes VAT"],["none","No VAT charged"]].map(([v,l])=>`<option value="${v}"${v===x.vat?" selected":""}>${l}</option>`).join("")}</select></label>
+ <label>Quote date<input name="date" type="date" value="${esc(x.date||"")}"></label><label>Valid until<input name="valid" type="date" value="${esc(x.valid||"")}"></label>
+ <label>Payment terms / lead time<input name="terms" value="${esc(x.terms||"")}" placeholder="e.g. 30% deposit, 4 weeks delivery"></label>
+ <label>Photo or PDF screenshot of the quote<input type="file" name="file" accept="image/*" capture="environment"></label><label>…or link to it<input name="link" type="text" inputmode="url" autocapitalize="none" value="${esc(x.link||"")}" placeholder="https://"></label>
+ ${isAdmin()?`<label>Status<select name="status">${QSTAT.map(s=>`<option${s===x.status?" selected":""}>${s}</option>`).join("")}</select></label>`:`<label>Status<select name="status">${QSTAT.filter(s=>s!=="Accepted").map(s=>`<option${s===x.status?" selected":""}>${s}</option>`).join("")}</select></label>`}
+ <label>Notes<textarea name="notes" rows="2">${esc(x.notes||"")}</textarea></label>
+ <p style="display:flex;gap:.5rem;justify-content:flex-end"><button value="cancel" formnovalidate>Cancel</button><button class="pri" value="ok">Save</button></p>`;
+ const sel=f.querySelector("[name=supplier]"),ns=f.querySelector(".newsup");sel.onchange=()=>{ns.style.display=sel.value==="__new"?"":"none"};
+ const d=$("#dlg");d.returnValue="";d.showModal();d.onclose=async()=>{if(d.returnValue!=="ok")return;const fd=new FormData(f),file=fd.get("file");
+  if(file&&file.size){try{x.file=await shrinkImg(file)}catch(e){toast("That file couldn't be read – try a photo or screenshot.")}}
+  let sv=fd.get("supplier");if(sv==="__new"){const nm=String(fd.get("supplierName")||"").trim();if(nm){const c={id:"C"+Date.now().toString(36),name:nm,type:"Supplier",who:me(),owner:me(),at:new Date().toISOString()};S.contacts=S.contacts||[];S.contacts.push(c);keyify(S);sv=c._k;log("Contact added: "+nm+" (Supplier)")}else sv=""}
+  x.supplier=sv;x.supplierName=sv?"":String(fd.get("supplierName")||"");x.line=fd.get("line")||"";x.desc=String(fd.get("desc")||"").trim();x.amount=Math.round((+fd.get("amount")||0)*100)/100;x.vat=fd.get("vat");x.date=fd.get("date")||"";x.valid=fd.get("valid")||"";x.terms=String(fd.get("terms")||"");x.link=safeUrl(fd.get("link"));x.notes=String(fd.get("notes")||"");x.status=fd.get("status")||"Received";
+  S.quotes=S.quotes||[];if(isNew){x.id="Q"+Date.now().toString(36);x.at=new Date().toISOString();S.quotes.push(x);log(`Quote added: ${supName(x)} ${money(qNet(x))} ex VAT – ${x.desc}`)}else{const i=S.quotes.findIndex(y=>y._k===x._k);if(i>=0)S.quotes[i]=x;log(`Quote updated: ${supName(x)} ${money(qNet(x))} ex VAT`)}render()}}
+function bindQuotes(){document.querySelectorAll("[data-qadd]").forEach(b=>b.onclick=()=>quoteDialog(null));
+ document.querySelectorAll("[data-qe]").forEach(b=>b.onclick=()=>quoteDialog(S.quotes.find(x=>x._k===b.dataset.qe)));
+ document.querySelectorAll("[data-qx]").forEach(b=>b.onclick=()=>{const x=S.quotes.find(y=>y._k===b.dataset.qx);if(x&&confirm(`Delete the quote from ${supName(x)}?`)){S.quotes=S.quotes.filter(y=>y!==x);log("Quote deleted: "+supName(x));render()}});
+ document.querySelectorAll("[data-qa]").forEach(b=>b.onclick=()=>{const x=S.quotes.find(y=>y._k===b.dataset.qa);if(!x)return;x.status="Accepted";
+  (S.quotes||[]).filter(y=>y!==x&&y.line&&y.line===x.line&&y.status!=="Accepted").forEach(y=>y.status="Rejected");
+  const ln=(S.budget||[]).find(l=>l._k===x.line);if(ln&&Math.abs((+ln.forecast||0)-qNet(x))>0.5&&confirm(`Set the budget for “${ln.item}” to this quote (${money(qNet(x))} ex VAT)? It's currently ${money(ln.forecast)}.`)){ln.forecast=Math.round(qNet(x)*100)/100}
+  log(`Quote accepted: ${supName(x)} ${money(qNet(x))} ex VAT${ln?" for "+ln.item:""}`);render();toast("Accepted. Other quotes for this work item are marked rejected.")});
+ document.querySelectorAll("[data-gocontact]").forEach(a=>a.onclick=e=>{e.preventDefault();const c=(S.contacts||[]).find(y=>y._k===a.dataset.gocontact);ui.cq=c?c.name:"";ui.ct="";view="contacts";render()})}
 /* ---------- Expenses: budget forecast per work item, reserve, spending log, partner stakes ---------- */
 const EXP_CATS=["Fit-out & building","Equipment & kit","Gas, electric & utilities","Legal & professional","Licences & compliance","Brand & marketing","Stock & supplies","Staff & training","Tech & systems","Rent, rates & deposits","Other"];
 const METHODS=["Own money (counts towards my stake)","Company account","Cash from takings"];
@@ -776,14 +863,15 @@ function expRow(e){const ln=(S.budget||[]).find(b=>b._k===e.line);
  <div class="qbtns">${canExp(e)?`<button class="small" data-ee="${esc(e._k)}">Edit</button>`:""}${isAdmin()&&e.status!=="Approved"?`<button class="small pri" data-ea="${esc(e._k)}">✓ Approve</button>`:""}${isAdmin()?`<button class="small del" data-ex="${esc(e._k)}">Delete</button>`:""}</div></li>`}
 R.money=()=>{const sub=ui.money||"overview",t=moneyTotals(),f=fin(),B=S.budget||[],E=S.expenses||[];
  const head=`<h2>Expenses</h2><p class="small mut">Budget forecast for each piece of work, the reserve, every pound spent, and what each partner has paid towards their committed stake.</p>
- ${signedIn()?'<p><button class="pri" data-elog>+ Log an expense</button></p>':""}${seg("money",[["overview","Overview"],["log","Spending log"],["budget","Budget"]],sub)}`;
+ ${signedIn()?'<p><button class="pri" data-elog>+ Log an expense</button></p>':""}${seg("money",[["overview","Overview"],["log","Spending log"],["quotes","Quotes"],["budget","Budget"]],sub)}`;
+ if(sub==="quotes")return head+quotesView();
  if(sub==="log"){const fw=ui.ew||"",fc=ui.ec||"",L=[...E].filter(e=>(!fw||e.paidBy===fw)&&(!fc||e.category===fc)).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   return head+`<div class="filters"><select id="ew" aria-label="Paid by"><option value="">Everyone</option>${teamNames().map(n=>`<option${n===fw?" selected":""}>${esc(n)}</option>`).join("")}</select><select id="ec" aria-label="Category"><option value="">All categories</option>${EXP_CATS.map(c=>`<option${c===fc?" selected":""}>${esc(c)}</option>`).join("")}</select><button id="ecsv">Export CSV</button></div>
   <div class="card"><h3>${L.length} entr${L.length===1?"y":"ies"} · ${money(L.filter(isSpend).reduce((a,e)=>a+(+e.amount||0),0))}</h3>${L.length?`<ul class="worklist">${L.map(expRow).join("")}</ul>`:'<p class="mut small">Nothing logged yet.</p>'}</div>`}
  if(sub==="budget"){return head+`<div class="card"><h3>Budget by work item</h3><p class="small mut">Forecast cost of each piece of work in the plan. Spending logged against a line is compared with its forecast.</p>
-  ${B.length?`<div class="tw"><table><thead><tr><th>Work item</th><th>Task</th><th>Category</th><th style="text-align:right">Forecast</th><th style="text-align:right">Spent</th><th style="text-align:right">Left</th><th></th></tr></thead><tbody>${[...B].sort((a,b)=>String(a.task||"~").localeCompare(String(b.task||"~"))).map(b=>{const sp=t.lineSpent(b._k),lf=(+b.forecast||0)-sp;return `<tr><td>${esc(b.item)}</td><td>${b.task&&task(b.task)?`<a href="#" data-edit="${esc(b.task)}">${esc(b.task)}</a>`:'<span class="mut">–</span>'}</td><td class="small">${esc(b.category||"")}</td><td style="text-align:right">${money(b.forecast)}</td><td style="text-align:right">${money(sp)}</td><td style="text-align:right" class="${lf<0?"bad":""}">${money(lf)}</td><td>${isAdmin()?`<button class="small" data-be="${esc(b._k)}">Edit</button>`:""}</td></tr>`}).join("")}
-  <tr><td colspan="3"><i>Spending not linked to a budget line</i></td><td></td><td style="text-align:right">${money(t.unplanned)}</td><td></td><td></td></tr>
-  <tr><td colspan="3"><b>Total forecast</b></td><td style="text-align:right"><b>${money(t.forecast)}</b></td><td style="text-align:right"><b>${money(t.spent)}</b></td><td style="text-align:right" class="${t.forecast-t.spent<0?"bad":""}"><b>${money(t.forecast-t.spent)}</b></td><td></td></tr></tbody></table></div>`:'<p class="mut small">No budget lines yet.</p>'}
+  ${B.length?`<div class="tw"><table><thead><tr><th>Work item</th><th>Task</th><th>Category</th><th style="text-align:right">Forecast</th><th style="text-align:right" title="Accepted quotes not yet paid">Committed</th><th style="text-align:right">Spent</th><th style="text-align:right">Left</th><th></th></tr></thead><tbody>${[...B].sort((a,b)=>String(a.task||"~").localeCompare(String(b.task||"~"))).map(b=>{const sp=t.lineSpent(b._k),lf=(+b.forecast||0)-sp;return `<tr><td>${esc(b.item)}</td><td>${b.task&&task(b.task)?`<a href="#" data-edit="${esc(b.task)}">${esc(b.task)}</a>`:'<span class="mut">–</span>'}</td><td class="small">${esc(b.category||"")}</td><td style="text-align:right">${money(b.forecast)}</td><td style="text-align:right">${committedFor(b._k)?money(committedFor(b._k)):'<span class="mut">–</span>'}</td><td style="text-align:right">${money(sp)}</td><td style="text-align:right" class="${lf<0?"bad":""}">${money(lf)}</td><td>${isAdmin()?`<button class="small" data-be="${esc(b._k)}">Edit</button>`:""}</td></tr>`}).join("")}
+  <tr><td colspan="3"><i>Spending not linked to a budget line</i></td><td></td><td></td><td style="text-align:right">${money(t.unplanned)}</td><td></td><td></td></tr>
+  <tr><td colspan="3"><b>Total forecast</b></td><td style="text-align:right"><b>${money(t.forecast)}</b></td><td style="text-align:right"><b>${money(committedTotal())}</b></td><td style="text-align:right"><b>${money(t.spent)}</b></td><td style="text-align:right" class="${t.forecast-t.spent<0?"bad":""}"><b>${money(t.forecast-t.spent)}</b></td><td></td></tr></tbody></table></div>`:'<p class="mut small">No budget lines yet.</p>'}
   ${isAdmin()?'<p><button class="pri" id="badd2">+ Add budget line</button> <button id="bfromplan">Add a line for every phase</button></p>':'<p class="small mut">Nishaf and Fanshad set the budget.</p>'}</div>
   <div class="card"><h3>Budget reserve</h3><p>${money(f.reserve)} held back for overruns. ${t.reserveUsed>0?`<b class="${t.reserveUsed>t.reserve?"bad":"warn"}">${money(t.reserveUsed)} used</b>`:"Untouched so far."}</p>${mbar(t.reserveUsed,t.reserve,"warnbar")}${isAdmin()?'<p><button id="fset">Set reserve and stakes</button></p>':""}</div>`}
  // overview
@@ -833,7 +921,7 @@ function finDialog(){if(!isAdmin())return;const fv=fin(),f=$("#dlgf");
  <p style="display:flex;gap:.5rem;justify-content:flex-end"><button value="cancel" formnovalidate>Cancel</button><button class="pri" value="ok">Save</button></p>`;
  const d=$("#dlg");d.returnValue="";d.showModal();d.onclose=()=>{if(d.returnValue!=="ok")return;const fd=new FormData(f),st={};teamNames().forEach(n=>{const v=+fd.get("st_"+n)||0;if(v)st[n]=v});
   S.finance={reserve:+fd.get("reserve")||0,stakes:st};log(`Budget reserve ${money(S.finance.reserve)}; stakes updated`);render()}}
-A.money=()=>{bindSeg();bindEdit();document.querySelectorAll("[data-elog]").forEach(b=>b.onclick=()=>expDialog(null));
+A.money=()=>{bindSeg();bindEdit();bindQuotes();document.querySelectorAll("[data-elog]").forEach(b=>b.onclick=()=>expDialog(null));
  document.querySelectorAll("[data-ee]").forEach(b=>b.onclick=()=>expDialog((S.expenses||[]).find(x=>x._k===b.dataset.ee)));
  document.querySelectorAll("[data-ea]").forEach(b=>b.onclick=()=>{const e=(S.expenses||[]).find(x=>x._k===b.dataset.ea);if(e){e.status="Approved";log(`Expense approved: ${money(e.amount)} – ${e.desc} (${e.paidBy})`);render()}});
  document.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{const e=(S.expenses||[]).find(x=>x._k===b.dataset.ex);if(e&&confirm(`Delete ${money(e.amount)} – ${e.desc}?`)){S.expenses=S.expenses.filter(x=>x!==e);log(`Expense deleted: ${money(e.amount)} – ${e.desc}`);render()}});

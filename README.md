@@ -128,6 +128,23 @@ Added once by the first Nishaf or Fanshad sign-in. It only adds items that don't
 - **Budget reserve and stakes:** set with **Set reserve and stakes**. Home shows an alert when spending eats into the reserve or goes over budget.
 - On laptops, the less-used sections (Menu, Franchise, Knowledge, Team, More) sit under **☰ More** so the header stays on one line.
 
+## Contacts
+Every stakeholder in one place: suppliers, contractors, consultants, agents, solicitors, council, landlord, utilities and more.
+- **Tap to call, WhatsApp or email.** **Save to phone** downloads a contact card (.vcf).
+- Search, filter by type, and export to CSV.
+- Everyone can add contacts and edit their own. Nishaf and Fanshad can edit or delete any contact.
+
+## Quotes (Expenses › Quotes)
+- Keep every estimate and quotation per work item (budget line): supplier, scope, amount, VAT (ex, inc or none), quote date, valid until, payment terms or lead time, and a photo or link of the quote.
+- **Compared like-for-like ex VAT**, with the cheapest marked. Expired quotes are flagged, and there's a reminder to get **three quotes** for anything over £1,000.
+- **Accept** (Nishaf and Fanshad) marks the other quotes for that item as rejected and offers to set the budget forecast to the accepted price.
+- The Budget table shows **Committed**: accepted quotes not yet paid.
+- **Suppliers quoting** lists each supplier with its quote count and accepted value, linked to Contacts. New suppliers typed into a quote are added to Contacts automatically.
+
+## Updates
+- The app checks `version.json` when it opens, when it comes back on screen and every 2 minutes, and loads a new version automatically. It waits until any change is saved first.
+- Release with `./bump-version.sh <version>`, then push. `vercel.json` turns off caching for the app files.
+
 ## To-do, reminders and calendars
 - **To-do tab:** add a to-do with an optional due date and **reminder time**. Nishaf and Fanshad can assign to-dos to anyone; everyone else adds their own. Owners tick them off; only Nishaf and Fanshad can delete.
 - **Push notifications:**
