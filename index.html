@@ -20,7 +20,7 @@ main{padding:1rem;max-width:1400px;margin:auto}
 .grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
 .big{font-size:2rem;font-weight:700}.mut{color:var(--mut)}.small{font-size:.85rem}
 button,select,input,textarea{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:.35rem .55rem}
-button{cursor:pointer}button.pri{background:var(--acc);color:#fff;border-color:var(--acc)}button.del{color:var(--bad)}
+button{cursor:pointer}.tgt{display:flex;flex-wrap:wrap;align-items:center;gap:.35rem .8rem;width:100%;text-align:left;background:var(--ok);color:#fff;border:1px solid var(--ok);border-radius:12px;padding:.7rem 1rem;margin:.2rem 0 .8rem;font-weight:650;min-height:48px;box-shadow:0 2px 0 color-mix(in srgb,var(--ok) 60%,#000)}.tgt b{font-size:1.25rem}.tgt .tsub{font-weight:500;font-size:.85rem;opacity:.95;flex-basis:100%}.tgt .tedit{margin-left:auto;font-size:.85rem;text-decoration:underline}.tgt.over{background:var(--bad);border-color:var(--bad)}div.tgt{cursor:default}button.pri{background:var(--acc);color:#fff;border-color:var(--acc)}button.del{color:var(--bad)}
 :focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:.4rem;border-bottom:1px solid var(--line);vertical-align:top}th{cursor:pointer;font-size:.85rem;color:var(--mut);white-space:nowrap}
 .tw{overflow-x:auto}
@@ -222,7 +222,7 @@ const me=()=>sync.name||"";
  copy, so the app still works offline and pushes queued changes when it reconnects. */
 const SB={url:"https://ufinmrgnqwutxwntcdvs.supabase.co",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmaW5tcmducXd1dHh3bnRjZHZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNTQ3NzQsImV4cCI6MjEwNjgzMDc3NH0.OH5ZXB5eUSDWsDdRcn63Vm0fGSbC-eCg-JgHY_2c4Uo"};
 if(window.NORWOOD_SB)Object.assign(SB,window.NORWOOD_SB);
-const APP_VER="2026-11-07g";
+const APP_VER="2026-11-07h";
 const COLLS=["team","tasks","raid","questions","menu","kpis","checklist","activity","brandboard","kb","growth","todos","budget","expenses","contacts","quotes"];
 const sync={pin:localStorage.getItem(KEY+".pin")||"",name:localStorage.getItem(KEY+".name")||"",role:localStorage.getItem(KEY+".role")||"",base:null,state:"off",peers:[],pushT:0,pullT:0,pushing:false,again:false,pendingPull:false,chan:null,err:""};
 /* ---------- Access rules (the server enforces the same rules; this only shapes the screen) ----------
@@ -862,9 +862,18 @@ const mbar=(v,max,cls)=>`<span class="bar mb2"><i class="${cls||""}" style="widt
 function expRow(e){const ln=(S.budget||[]).find(b=>b._k===e.line);
  return `<li class="work"><div><b>${money(e.amount)}</b> ${esc(e.desc)}<div class="small mut">${fmt(e.date)} · ${esc(e.category||"")}${ln?` · ${esc(ln.item)}`:""} · paid by <b>${esc(e.paidBy)}</b> · ${esc(String(e.method||"").replace(" (counts towards my stake)",""))}${e.kind==="Cash paid in"?' <span class="chip st-Done">cash paid in</span>':""} ${e.status==="Approved"?'<span class="chip st-Done">approved</span>':'<span class="chip">awaiting approval</span>'}${safeImg(e.receipt)?` · <a href="${safeImg(e.receipt)}" target="_blank" rel="noopener">receipt</a>`:""}${e.notes?" · "+esc(e.notes):""}</div></div>
  <div class="qbtns">${canExp(e)?`<button class="small" data-ee="${esc(e._k)}">Edit</button>`:""}${isAdmin()&&e.status!=="Approved"?`<button class="small pri" data-ea="${esc(e._k)}">✓ Approve</button>`:""}${isAdmin()?`<button class="small del" data-ex="${esc(e._k)}">Delete</button>`:""}</div></li>`}
+function tgtBtn(t,f){const tg=+f.target||0,ad=isAdmin();if(!tg&&!ad)return"";
+ if(!tg)return '<button class="tgt" data-tgt>🎯 <b>Set target budget</b><span class="tsub">The most you want to spend on the whole pilot store.</span></button>';
+ const over=t.total-tg,sp=t.spent,tag=ad?"button":"div";
+ return `<${tag} class="tgt"${ad?" data-tgt":""}>🎯 Target budget <b>${money(tg)}</b>${ad?'<span class="tedit">Edit</span>':""}<span class="tsub">Planned ${money(t.total)} (forecast + reserve) – ${over>0?"⚠️ "+money(over)+" over target":money(-over)+" under target"} · Spent ${money(sp)} (${Math.round(sp/tg*100)}% of target)</span></${tag}>`}
+function tgtDialog(){if(!isAdmin())return;const fv=fin(),f=$("#dlgf");
+ f.innerHTML=`<h3>Target budget</h3><p class="small mut">The total you're aiming to spend on the pilot store. Everyone sees how the plan and the spending compare with it.</p><label>Target (£)<input name="target" type="number" inputmode="decimal" step="0.01" min="0" value="${fv.target||""}" placeholder="e.g. 150000"></label>
+ <p style="display:flex;gap:.5rem;justify-content:flex-end"><button value="cancel" formnovalidate>Cancel</button><button class="pri" value="ok">Save</button></p>`;
+ const d=$("#dlg");d.returnValue="";d.showModal();d.onclose=()=>{if(d.returnValue!=="ok")return;const v=Math.round((+new FormData(f).get("target")||0)*100)/100;
+  S.finance=Object.assign({},fin(),{target:v});log(v?`Target budget set to ${money(v)}`:"Target budget cleared");render();toast("Saved.")}}
 R.money=()=>{const sub=ui.money||"overview",t=moneyTotals(),f=fin(),B=S.budget||[],E=S.expenses||[];
  const head=`<h2>Expenses</h2><p class="small mut">Budget forecast for each piece of work, the reserve, every pound spent, and what each partner has paid towards their committed stake.</p>
- ${signedIn()?'<p><button class="pri" data-elog>+ Log an expense</button></p>':""}${seg("money",[["overview","Overview"],["log","Spending log"],["quotes","Quotes"],["budget","Budget"]],sub)}`;
+ ${tgtBtn(t,f)}${signedIn()?'<p><button class="pri" data-elog>+ Log an expense</button></p>':""}${seg("money",[["overview","Overview"],["log","Spending log"],["quotes","Quotes"],["budget","Budget"]],sub)}`;
  if(sub==="quotes")return head+quotesView();
  if(sub==="log"){const fw=ui.ew||"",fc=ui.ec||"",L=[...E].filter(e=>(!fw||e.paidBy===fw)&&(!fc||e.category===fc)).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   return head+`<div class="filters"><select id="ew" aria-label="Paid by"><option value="">Everyone</option>${teamNames().map(n=>`<option${n===fw?" selected":""}>${esc(n)}</option>`).join("")}</select><select id="ec" aria-label="Category"><option value="">All categories</option>${EXP_CATS.map(c=>`<option${c===fc?" selected":""}>${esc(c)}</option>`).join("")}</select><button id="ecsv">Export CSV</button></div>
@@ -921,7 +930,7 @@ function finDialog(){if(!isAdmin())return;const fv=fin(),f=$("#dlgf");
  f.innerHTML=`<h3>Reserve and partner stakes</h3><label>Budget reserve (£)<input name="reserve" type="number" inputmode="decimal" step="0.01" min="0" value="${fv.reserve||""}"></label><h4>Shareholders and committed stake (£)</h4><p class="small mut">Untick anyone who isn't investing (e.g. staff). They stay in the team but drop out of Partner stakes.</p>${teamNames().map(n=>{const on=partners().includes(n);return `<label><span style="display:flex;gap:.5rem;align-items:center"><input type="checkbox" name="pt_${esc(n)}" style="width:auto"${on?" checked":""}> ${esc(n)} is a shareholder</span><input name="st_${esc(n)}" type="number" inputmode="decimal" step="0.01" min="0" value="${fv.stakes[n]||""}" placeholder="Committed stake"></label>`}).join("")}
  <p style="display:flex;gap:.5rem;justify-content:flex-end"><button value="cancel" formnovalidate>Cancel</button><button class="pri" value="ok">Save</button></p>`;
  const d=$("#dlg");d.returnValue="";d.showModal();d.onclose=()=>{if(d.returnValue!=="ok")return;const fd=new FormData(f),st={},pt=teamNames().filter(n=>fd.get("pt_"+n));pt.forEach(n=>{const v=+fd.get("st_"+n)||0;if(v)st[n]=v});
-  S.finance={reserve:+fd.get("reserve")||0,stakes:st,partners:pt};log(`Budget reserve ${money(S.finance.reserve)}; stakes updated`);render()}}
+  S.finance=Object.assign({},fin(),{reserve:+fd.get("reserve")||0,stakes:st,partners:pt});log(`Budget reserve ${money(S.finance.reserve)}; stakes updated`);render()}}
 A.money=()=>{bindSeg();bindEdit();bindQuotes();document.querySelectorAll("[data-elog]").forEach(b=>b.onclick=()=>expDialog(null));
  document.querySelectorAll("[data-ee]").forEach(b=>b.onclick=()=>expDialog((S.expenses||[]).find(x=>x._k===b.dataset.ee)));
  document.querySelectorAll("[data-ea]").forEach(b=>b.onclick=()=>{const e=(S.expenses||[]).find(x=>x._k===b.dataset.ea);if(e){e.status="Approved";log(`Expense approved: ${money(e.amount)} – ${e.desc} (${e.paidBy})`);render()}});
@@ -929,7 +938,7 @@ A.money=()=>{bindSeg();bindEdit();bindQuotes();document.querySelectorAll("[data-
  document.querySelectorAll("[data-be]").forEach(b=>b.onclick=()=>lineDialog((S.budget||[]).find(x=>x._k===b.dataset.be)));
  if($("#badd2"))$("#badd2").onclick=()=>lineDialog(null);
  if($("#bfromplan"))$("#bfromplan").onclick=()=>{const have=new Set((S.budget||[]).map(b=>b.item));let n=0;phases().forEach(ph=>{if(!have.has(ph)){S.budget.push({id:"B"+Date.now().toString(36)+n,item:ph,task:"",category:"Other",forecast:0,notes:"Fill in the forecast"});n++}});if(n){log(`Added ${n} budget lines from the plan phases`);render();toast(n+" lines added – edit each to set its forecast.")}else toast("Every phase already has a line.")};
- document.querySelectorAll("#fset").forEach(b=>b.onclick=finDialog);
+ document.querySelectorAll("#fset").forEach(b=>b.onclick=finDialog);document.querySelectorAll("[data-tgt]").forEach(b=>b.onclick=tgtDialog);
  if($("#ew"))$("#ew").onchange=e=>{ui.ew=e.target.value;render()};if($("#ec"))$("#ec").onchange=e=>{ui.ec=e.target.value;render()};
  if($("#ecsv"))$("#ecsv").onclick=()=>{const q=v=>`"${String(v??"").replace(/"/g,'""')}"`,B=S.budget||[];
   dl("project-norwood-expenses.csv",["Date,Type,Amount,What for,Category,Budget line,Paid by,Paid with,Status,Notes",...(S.expenses||[]).map(e=>[e.date,e.kind,(+e.amount||0).toFixed(2),e.desc,e.category,(B.find(b=>b._k===e.line)||{}).item||"",e.paidBy,e.method,e.status,e.notes].map(q).join(","))].join("\n"),"text/csv")}};
